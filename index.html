@@ -1,1 +1,882 @@
-<html style="background-color: black;"></html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>tetrahedron</title>
+        <link 
+            rel="icon" 
+            type="image/svg+xml" 
+            href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22256%22 height=%22256%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%237d6ee7%22></rect><text x=%2250%%22 y=%2250%%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-size=%2290%22>🌌</text></svg>"
+        />
+
+        <style>
+            html, body { 
+                margin: 0;
+                height: 100%;
+            }
+            #c {
+                width: 100%;
+                height: 100%;
+                display: block;
+                background-color: black;
+            }
+        </style>
+    </head>
+    <body>
+        <script src="https://threejs.org/build/three.js"></script>
+        <script src="https://threejs.org/examples/js/libs/dat.gui.min.js"></script>
+        <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+        <script src="https://threejs.org/examples/js/libs/stats.min.js"></script>
+        <script type="module">
+            class MinMaxGUIHelper {
+                constructor(obj, minProp, maxProp, minDif) {
+                    this.obj = obj;
+                    this.minProp = minProp;
+                    this.maxProp = maxProp;
+                    this.minDif = minDif;
+                }
+                get min() {
+                    return this.obj[this.minProp];
+                }
+                set min(v) {
+                    this.obj[this.minProp] = v;
+                    this.obj[this.maxProp] = Math.max(this.obj[this.maxProp], v + this.minDif);
+                }
+                get max() {
+                    return this.obj[this.maxProp];
+                }
+                set max(v) {
+                    this.obj[this.maxProp] = v;
+                    this.min = this.min; // call the min setter
+                }
+            }
+
+            function main() {
+                // Initialize the stats
+                // DEBUG
+                // const stats = Stats()
+                // document.body.appendChild(stats.dom)
+
+                // Set up the scene
+                const canvas = document.querySelector('#c');
+                const renderer = new THREE.WebGLRenderer({canvas, alpha: true});
+                const scene = new THREE.Scene();
+                scene.autoUpdate = false
+
+                // Set up the camera
+                const fov = 50;
+                const aspect = 2;  // the canvas default
+                const near = 0.1;
+                const far = 5000;
+                const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+                camera.position.z = 5;
+
+                // Set up lighting 
+                const light = new THREE.DirectionalLight(0xFFFFFF, 1);
+                light.position.set(-1, 2, 4);
+                scene.add(light);
+                
+                // Draw the skydome
+                const textureLoader = new THREE.TextureLoader();
+                const skyTexture = textureLoader.load(
+                    "http://www.asterank.com/static/img/eso_dark.jpg",
+                    () => {
+                        const rt = new THREE.WebGLCubeRenderTarget(skyTexture.image.height);
+                        rt.fromEquirectangularTexture(renderer, skyTexture);
+                        scene.background = rt.texture;
+                    }
+                )
+
+                // Set up globals
+                var currentFaceIntersect = null;
+                var mouseDownFaceIntersect = null;
+                var mouseCurrentlyRotating = false;
+                var mouseCurrentlyRemoving = false;
+                var useTouchControls = false;
+                var params = {
+                    midpoints: false,
+                    rotate: false,
+                    rays: true,
+                    vertexSpheres: true
+                };
+
+                // Debug colors are always in roygbiv order
+                const colorIndex = [
+                    0xFF0000, // red
+                    0xFFFF00, // yellow
+                    0x00FF00, // green
+                    0x0000FF, // blue
+                ]
+                const nodeColor = new THREE.Color(0xAE9473); // light tan
+                const edgeColor = new THREE.Color(0xFFFFFFF); // white
+                const triangleHoverColor = new THREE.Color(0xAE9473); // light tan
+                const triangleBlockedColor = new THREE.Color(0xFF0000); // red
+                const triangleRemoveColor = new THREE.Color(0xFF0000); // red
+
+                // Set up controls
+                const controls = new THREE.OrbitControls(camera, canvas);
+
+                // Handle mouse input
+                const mouseRaycaster = new THREE.Raycaster();
+                const mousePosition = new THREE.Vector2()
+                
+                // Set up the GUI
+                // DEBUG
+                // const gui = new dat.gui.GUI();
+                // gui.closed = true;
+                // gui.add(camera, 'fov', 0, 180).onChange(updateCamera);
+                // const minMaxGUIHelper = new MinMaxGUIHelper(camera, 'near', 'far', 0.1);
+                // gui.add(minMaxGUIHelper, 'min', 0.1, 50, 0.1).name('near').onChange(updateCamera);
+                // gui.add(minMaxGUIHelper, 'max', 50, 5000, 10).name('far').onChange(updateCamera);
+                // gui.add(params, "midpoints").name("show midpoints").onChange(setShowMidpoints);
+                // gui.add(params, "rotate").name("enable rotation");
+                // gui.add(params, "vertexSpheres").name("show vertices").onChange(setShowVertices);
+
+                const localStorageJson = loadFromLocalStorage();
+                if (localStorageJson && localStorageJson.length > 1) {
+                    // If there are any tetrahedrons in local storage, set them back up
+                    localStorageJson.forEach(tetrahedron => {
+                        const t = makeVerticesFromTetrahedronJson(tetrahedron);
+                        addTetrahedron(makeTetrahedron(t));
+
+                        recenterCamera();
+                        updateCamera();
+                    });
+                } else {
+                    // Otherwise, add a tetrahedron
+                    addTetrahedron(makeTetrahedron());
+                }
+
+                // Start the rendering process
+                requestAnimationFrame(render);
+
+                // Take an array of vertices and return a world space tetrahedron group
+                function makeTetrahedron(vertices = false) {
+                    const group = new THREE.Group();
+                    group.name = "tetrahedron group";
+                    
+                    if (!vertices) {
+                        // If no vertices came in, create a tetrahedron of size 1 at the origin
+                        const initialGeometry = new THREE.TetrahedronGeometry(1);
+                        group.r = Math.abs(initialGeometry.attributes.position.array[0]);
+
+                        const v = initialGeometry.attributes.position.array;
+                        group.worldVertices = [
+                            new THREE.Vector3(v[0], v[1], v[2]),
+                            new THREE.Vector3(v[3], v[4], v[5]),
+                            new THREE.Vector3(v[6], v[7], v[8]),
+                            new THREE.Vector3(v[9], v[10], v[11])
+                        ]
+                    } else {
+                        group.worldVertices = vertices;
+                    }
+
+                    // Create a line between each vertex
+                    group.lines = [
+                        {a: group.worldVertices[0], b: group.worldVertices[1]},
+                        {a: group.worldVertices[0], b: group.worldVertices[2]},
+                        {a: group.worldVertices[0], b: group.worldVertices[3]},
+                        {a: group.worldVertices[1], b: group.worldVertices[2]},
+                        {a: group.worldVertices[1], b: group.worldVertices[3]},
+                        {a: group.worldVertices[2], b: group.worldVertices[3]}
+                    ]
+
+                    // Add lines to the group
+                    const lineMaterial = new THREE.LineBasicMaterial({color: edgeColor});
+                    group.lines.forEach(line => {
+                        const linePoints = [line.a, line.b]
+                        const lineGeometry = new THREE.BufferGeometry().setFromPoints(linePoints);
+                        const lineMesh = new THREE.Line(lineGeometry, lineMaterial);
+                        lineMesh.name = "edge line";
+                        group.add(lineMesh);
+                    });
+
+                    // Add a raycaster for each line
+                    group.raycasters = [];
+                    group.lines.forEach(line => {
+                        group.raycasters.push(makeRayFromLine(line));
+                    });
+
+                    // Create and add face triangles
+                    group.faceTriangles = []
+
+                    group.faceTriangles.push(makeFaceTriangle(
+                        group.worldVertices[0], 
+                        group.worldVertices[1], 
+                        group.worldVertices[2], 
+                        group.worldVertices[3],
+                        triangleHoverColor // colorIndex[0]
+                    ));
+
+                    group.faceTriangles.push(makeFaceTriangle(
+                        group.worldVertices[3], 
+                        group.worldVertices[1], 
+                        group.worldVertices[0], 
+                        group.worldVertices[2],
+                        triangleHoverColor // colorIndex[1]
+                    ));
+
+                    group.faceTriangles.push(makeFaceTriangle(
+                        group.worldVertices[0], 
+                        group.worldVertices[2], 
+                        group.worldVertices[3], 
+                        group.worldVertices[1],
+                        triangleHoverColor // colorIndex[2]
+                    ));
+
+                    group.faceTriangles.push(makeFaceTriangle(
+                        group.worldVertices[3], 
+                        group.worldVertices[2], 
+                        group.worldVertices[1], 
+                        group.worldVertices[0],
+                        triangleHoverColor // colorIndex[3]
+                    ));
+                    
+                    // Add them all to the group
+                    group.faceTriangles.forEach((ft) => {
+                        group.add(ft);
+                    });
+
+                    // Add spheres at vertices
+                    group.vertexSpheres = [];
+                    group.worldVertices.forEach((v, i) => {
+                        const vertexSphere = makeSphereMarker(
+                            0.05,
+                            nodeColor, // colorIndex[i],
+                            params.vertexSpheres
+                        );
+                        vertexSphere.position.setX(v.x);
+                        vertexSphere.position.setY(v.y);
+                        vertexSphere.position.setZ(v.z);
+                        vertexSphere.updateMatrixWorld();
+                        vertexSphere.name = "vertex sphere";
+                        group.vertexSpheres.push(vertexSphere);
+                        group.add(vertexSphere);
+                        
+                    });
+
+                    return group;
+                }
+
+                function makeSphereMarker(
+                    radius = 0.1, 
+                    color = 0xFFFFFF, 
+                    initialVisibility = true
+                ) {
+                    const sphereMaterial = new THREE.MeshBasicMaterial({color: color});
+                    const sphereGeometry = new THREE.SphereGeometry(radius, 32, 32);
+                    const sphereMesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
+                    sphereMesh.material.visible = initialVisibility;
+                    sphereMesh.name = "sphere marker";
+
+                    return sphereMesh;
+                }
+
+                function makeFaceTriangle(
+                    v1, 
+                    v2, 
+                    v3, 
+                    insideOppositeVertex,
+                    color = triangleHoverColor,
+                ) {
+                    // Compute the center of each face and store it on the mesh
+                    var cx = ((v1.x + v2.x + v3.x) / 3);
+                    var cy = ((v1.y + v2.y + v3.y) / 3);
+                    var cz = ((v1.z + v2.z + v3.z) / 3);
+
+                    // Create direction vectors between each vertex and the center
+                    const v1ToCenter = new THREE.Vector3(cx - v1.x, cy - v1.y, cz - v1.z).normalize();
+                    const v2ToCenter = new THREE.Vector3(cx - v2.x, cy - v2.y, cz - v2.z).normalize();
+                    const v3ToCenter = new THREE.Vector3(cx - v3.x, cy - v3.y, cz - v3.z).normalize();
+
+                    // Create new smaller vertices for the triangle by moving towards the center
+                    const buffer = 0.01;
+                    const v1ToCenterSmaller = new THREE.Vector3(
+                        v1.x + v1ToCenter.x * buffer,
+                        v1.y + v1ToCenter.y * buffer,
+                        v1.z + v1ToCenter.z * buffer
+                    );
+                    const v2ToCenterSmaller = new THREE.Vector3(
+                        v2.x + v2ToCenter.x * buffer,
+                        v2.y + v2ToCenter.y * buffer,
+                        v2.z + v2ToCenter.z * buffer
+                    );
+                    const v3ToCenterSmaller = new THREE.Vector3(
+                        v3.x + v3ToCenter.x * buffer,
+                        v3.y + v3ToCenter.y * buffer,
+                        v3.z + v3ToCenter.z * buffer
+                    );
+
+                    // Create the mesh
+                    const triangleMaterial = new THREE.MeshBasicMaterial({color: color});
+                    triangleMaterial.side = THREE.DoubleSide;
+
+                    const faceTriangleGeometry = new THREE.BufferGeometry();
+
+                    const normalVerticesArray = new Float32Array([
+                        v1.x, v1.y, v1.z,
+                        v2.x, v2.y, v2.z,
+                        v3.x, v3.y, v3.z
+                    ]);
+
+                    const smallVerticesArray = new Float32Array([
+                        v1ToCenterSmaller.x, v1ToCenterSmaller.y, v1ToCenterSmaller.z,
+                        v2ToCenterSmaller.x, v2ToCenterSmaller.y, v2ToCenterSmaller.z,
+                        v3ToCenterSmaller.x, v3ToCenterSmaller.y, v3ToCenterSmaller.z
+                    ]);
+
+                    faceTriangleGeometry.setAttribute(
+                        'position', 
+                        new THREE.BufferAttribute(smallVerticesArray, 3)
+                    );
+                    const faceTriangleMesh = new THREE.Mesh(faceTriangleGeometry, triangleMaterial);
+                    faceTriangleMesh.material.visible = false;
+                    faceTriangleMesh.name = "face triangle";
+                    faceTriangleMesh.v1 = new THREE.Vector3(v1.x, v1.y, v1.z);
+                    faceTriangleMesh.v2 = new THREE.Vector3(v2.x, v2.y, v2.z);
+                    faceTriangleMesh.v3 = new THREE.Vector3(v3.x, v3.y, v3.z);
+                    faceTriangleMesh.centerPoint = new THREE.Vector3(cx, cy, cz);
+                    faceTriangleMesh.vertices = [v1, v2, v3];
+
+                    // Create a marker at the center point
+                    const centerPointMarker = makeSphereMarker(
+                        0.05, 
+                        0xff00ff, 
+                        params.midpoints
+                    );
+                    centerPointMarker.position.set(cx, cy, cz);
+                    centerPointMarker.updateMatrixWorld();
+                    centerPointMarker.name = "face center point marker";
+                    faceTriangleMesh.centerPointMarker = centerPointMarker;
+                    faceTriangleMesh.add(centerPointMarker);
+
+                    // Store the inside opposite vertex
+                    faceTriangleMesh.insideOppositeVertex = new THREE.Vector3(
+                        insideOppositeVertex.x, 
+                        insideOppositeVertex.y, 
+                        insideOppositeVertex.z
+                    );
+
+                    // calculate vector from inside vertex to center
+                    const insideToCenter = new THREE.Vector3(
+                        cx - insideOppositeVertex.x,
+                        cy - insideOppositeVertex.y,
+                        cz - insideOppositeVertex.z
+                    );
+
+                    // add that vector to the center to get the outside vertex position
+                    const outsideOppositeVertex = new THREE.Vector3(
+                        cx + insideToCenter.x,
+                        cy + insideToCenter.y,
+                        cz + insideToCenter.z
+                    );
+
+                    const outsideToCenter = new THREE.Vector3(
+                        cx - outsideOppositeVertex.x,
+                        cy - outsideOppositeVertex.y,
+                        cz - outsideOppositeVertex.z
+                    );
+
+                    faceTriangleMesh.outsideOppositeVertex = outsideOppositeVertex;
+
+                    // Return the fully constructed mesh
+                    return faceTriangleMesh;
+                }
+
+                function makeLineFromRay(raycaster, color = 0x00cc00) {
+                    const lineMaterial = new THREE.LineBasicMaterial({color: color});
+
+                    const rayOrigin = raycaster.ray.origin.clone();
+                    
+                    const rayNearPoint = new THREE.Vector3();
+                    raycaster.ray.at(raycaster.near, rayNearPoint);
+                    
+                    const rayFarPoint = new THREE.Vector3();
+                    raycaster.ray.at(raycaster.far, rayFarPoint);
+
+                    const linePoints = [
+                        rayNearPoint,
+                        rayFarPoint
+                    ]
+
+                    const lineGeometry = new THREE.BufferGeometry().setFromPoints(linePoints);
+                    const lineMesh = new THREE.Line(lineGeometry, lineMaterial);
+                    lineMesh.name = "raycaster line";
+
+                    return lineMesh;
+                }
+
+                function makeRayFromLine(line) {
+                    // Set the two ends of the line
+                    const v1 = new THREE.Vector3();
+                    v1.x = line.a.x;
+                    v1.y = line.a.y;
+                    v1.z = line.a.z;
+
+                    const v2 = new THREE.Vector3();
+                    v2.x = line.b.x;
+                    v2.y = line.b.y;
+                    v2.z = line.b.z;
+
+                    // Calculate the direction for the ray
+                    const direction = new THREE.Vector3();
+                    direction.subVectors(v2, v1);
+
+                    // Calculate the length (far distance) for the ray
+                    const length = direction.length();
+
+                    // Create the new raycaster
+                    const raycaster = new THREE.Raycaster(
+                        v1,
+                        direction.normalize(),
+                        0.0,
+                        length
+                    );
+
+                    return raycaster;
+                }
+
+                function makeVerticesFromTetrahedronJson(json) {
+                    const worldVertices = [];
+                    for (let i = 0; i < json.length; i++) {
+                        const vertex = new THREE.Vector3(
+                            json[i].x,
+                            json[i].y,
+                            json[i].z
+                        );
+
+                        worldVertices.push(vertex);
+                    }
+
+                    return worldVertices;
+                }
+
+                function makeTetrahedronJsonFromScene() {
+                    const tetrahedronJson = [];
+                    for (let i = 0; i < scene.children.length; i++) {
+                        const child = scene.children[i];
+                        if (child.name === "tetrahedron group") {
+                            // Create vertex json
+                            const vertexJson = [];
+                            child.worldVertices.forEach(vertex => {
+                                vertexJson.push({
+                                    "x": vertex.x,
+                                    "y": vertex.y,
+                                    "z": vertex.z
+                                });
+                            });
+
+                            tetrahedronJson.push(vertexJson);
+                        }
+                    }
+
+                    return tetrahedronJson;
+                }
+
+                function checkForCollisions(clickedFace) {
+                    const allFaceTriangles = getAllFaceTriangles();
+
+                    // Calculate raycasters from the vertices of the clicked face to the outside opposite vertex
+                    const newRaycasters = [];
+                    clickedFace.vertices.forEach((vertex, i) => {
+                        const raycaster = new THREE.Raycaster(
+                            vertex.clone(),
+                            clickedFace.outsideOppositeVertex.clone().sub(vertex).normalize(),
+                            0.0,
+                            clickedFace.outsideOppositeVertex.clone().sub(vertex).length()
+                        );
+                        raycaster.name = "new raycaster";
+                        newRaycasters.push(raycaster);
+                    });
+
+                    // Check for collisions between the new raycasters and all face triangles
+                    const collisions = [];
+                    newRaycasters.forEach(raycaster => {
+                        const collisionResults = raycaster.intersectObjects(
+                            allFaceTriangles, 
+                            false
+                        );
+                        if (collisionResults.length > 0) {
+                            collisions.push(...collisionResults);
+                        }
+                    });
+
+                    // Check the raycasters for each tetrahedron group for collisions
+                    getAllTetrahedronGroups().forEach(tetrahedronGroup => {
+                        tetrahedronGroup.raycasters.forEach(raycaster => {
+                            const collisionResults = raycaster.intersectObjects(
+                                allFaceTriangles,
+                                false
+                            );
+                            if (collisionResults.length > 0) {
+                                collisions.push(...collisionResults);
+                            }
+                        });
+                    });
+
+                    return collisions;
+                }
+
+                function addTetrahedron(tetrahedronGroup) {
+                    // Skip if it's a dupe
+                    const dupe = false;
+                    getAllTetrahedronGroups().forEach(group => {
+                        if (group.worldVertices == tetrahedronGroup.worldVertices) {
+                            dupe = true;
+                        }
+                    });
+
+                    if (!dupe) {
+                        // Save the tetrahedron to the json list
+                        const vertexJson = [];
+                        tetrahedronGroup.worldVertices.forEach(vertex => {
+                            vertexJson.push({
+                                "x": vertex.x,
+                                "y": vertex.y,
+                                "z": vertex.z
+                            });
+                        });
+
+                        // Add the tetrahedron to the scene
+                        scene.add(tetrahedronGroup);
+
+                        saveToLocalStorage();
+                    }
+                }
+
+                function removeTetrahedron(tetrahedronGroup) {
+                    // Remove the tetrahedron from the json list
+                    const vertexJson = [];
+                    tetrahedronGroup.worldVertices.forEach(vertex => {
+                        vertexJson.push({
+                            "x": vertex.x,
+                            "y": vertex.y,
+                            "z": vertex.z
+                        });
+                    });
+
+                    // Remove the tetrahedron from the scene
+                    scene.remove(tetrahedronGroup);
+
+                    // If the scene no has no remaining tetrahedrons, readd one
+                    if (getAllTetrahedronGroups().length < 1) {
+                        addTetrahedron(makeTetrahedron());
+                    }
+
+                    saveToLocalStorage();
+                }
+
+                function saveToLocalStorage() {
+                    // Save the current scene to local storage
+                    localStorage.setItem(
+                        "tetrahedrons", 
+                        JSON.stringify(
+                            makeTetrahedronJsonFromScene()
+                        )
+                    );
+                }
+
+                function loadFromLocalStorage() {
+                    const json = JSON.parse(localStorage.getItem("tetrahedrons"));
+                    
+                    return json;
+                }
+
+                // Resize the renderer and aspect ratio to fit the canvas if needed
+                function resizeRendererToDisplaySize(renderer) {
+                    const canvas = renderer.domElement;
+                    const width = canvas.clientWidth;
+                    const height = canvas.clientHeight;
+                    const needResize = canvas.width !== width || canvas.height !== height;
+                    if (needResize) {
+                        renderer.setSize(width, height, false);
+                        camera.aspect = canvas.clientWidth / canvas.clientHeight;
+                        camera.updateProjectionMatrix();
+                    }
+
+                    // Return true if anything was resized
+                    return needResize;
+                }
+
+                function getAllFaceTriangles() {
+                    const faceTriangles = [];
+                    if (scene.children.length > 0) {
+                        scene.children.forEach(child => {
+                            if (child.name == "tetrahedron group") {
+                                child.children.forEach(child => {
+                                    if (child.name == "face triangle") {
+                                        faceTriangles.push(child);
+                                    }
+                                });
+                            }
+                        });
+                    }
+
+                    return faceTriangles;
+                }
+
+                function getAllTetrahedronGroups() {
+                    const tetrahedrons = [];
+                    if (scene.children.length > 0) {
+                        scene.children.forEach(child => {
+                            if (child.name == "tetrahedron group") {
+                                tetrahedrons.push(child);
+                            }
+                        });
+                    }
+
+                    return tetrahedrons;
+                }
+
+                function setShowMidpoints(value) {
+                    getAllFaceTriangles().forEach((ft) => {
+                        ft.centerPointMarker.material.visible = value;
+                    });
+                }
+
+                function setShowVertices(value) {
+                    getAllTetrahedronGroups().forEach((t) => {
+                        t.vertexSpheres.forEach((v) => {
+                            v.material.visible = value;
+                        });
+                    });
+                }
+
+                canvas.addEventListener(
+                    'mousedown',
+                    function() {
+                        // The mouse position is already updated from the mousemove event
+                        handleStartClick();
+                    }
+                )
+
+                canvas.addEventListener(
+                    'touchstart',
+                    function(event) {
+                        // If there is ever a touch event, permanently set to use touch controls
+                        useTouchControls = true;
+
+                        event.preventDefault();
+                        // Touch start updates the mouse position
+                        mousePosition.x = (event.touches[0].clientX / window.innerWidth) * 2 - 1;
+                        mousePosition.y = -(event.touches[0].clientY / window.innerHeight) * 2 + 1;
+
+                        // Set the intersection
+                        currentFaceIntersect = getCurrentFaceIntersect();
+
+                        handleStartClick();
+                    },
+                    false
+                );
+
+                function handleStartClick() {
+                    // If there is not a current face intersect, do nothing
+                    if (currentFaceIntersect == null) {
+                        mouseDownFaceIntersect = null;
+
+                        // We are currently able to rotate the camera
+                        mouseCurrentlyRotating = true;
+                    } else {
+                        // If there is an intersect, prep it for mouseup
+                        mouseDownFaceIntersect = currentFaceIntersect;
+
+                        controls.enableRotate = false;
+                    }
+                }
+
+                canvas.addEventListener(
+                    'mousemove', 
+                    function(event) {
+                        mousePosition.x = (event.clientX / window.innerWidth) * 2 - 1;
+                        mousePosition.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+                        mouseRaycaster.setFromCamera(mousePosition, camera);
+                    },
+                    false
+                );
+
+                canvas.addEventListener(
+                    'touchmove',
+                    function(event) {
+                        event.preventDefault();
+                        mousePosition.x = (event.touches[0].clientX / window.innerWidth) * 2 - 1;
+                        mousePosition.y = -(event.touches[0].clientY / window.innerHeight) * 2 + 1;
+
+                        mouseRaycaster.setFromCamera(mousePosition, camera);
+                    },
+                    false
+                );
+
+                canvas.addEventListener(
+                    'mouseup',
+                    function() {
+                        // If there was no mousedown intersect, or there is no intersect now, skip
+                        handleStopClick();
+                    }
+                )
+
+                canvas.addEventListener(
+                    'touchend',
+                    function(event) {
+                        event.preventDefault();
+                        handleStopClick();
+
+                        mousePosition.x = 1;
+                        mousePosition.y = 1;
+                        mouseRaycaster.setFromCamera(mousePosition, camera);
+                    },
+                    false
+                );
+
+                function handleStopClick() {
+                    if (mouseDownFaceIntersect == null && currentFaceIntersect == null) {
+                            // If you clicked in space, you were just rotating
+
+                    } else if (
+                        mouseDownFaceIntersect != null && 
+                        currentFaceIntersect != null && 
+                        mouseDownFaceIntersect.object == currentFaceIntersect.object
+                    ) {
+                        // If you mousedown and mouseup on the same face, add to it
+                        const clickedFace = currentFaceIntersect.object;
+                        const collisions = checkForCollisions(clickedFace);
+                        if (collisions.length > 0) {
+                            // Set this face for the error pulse animation
+                            clickedFace.pulseTimer = 100;
+
+                        } else {
+                            // Add the tetrahedron
+                            addTetrahedron(
+                                makeTetrahedron([
+                                    clickedFace.v1,
+                                    clickedFace.v2,
+                                    clickedFace.v3,
+                                    clickedFace.outsideOppositeVertex,
+                                ])
+                            );
+                        }
+                    } else if (
+                        mouseDownFaceIntersect != null &&
+                        (
+                            currentFaceIntersect == null ||
+                            currentFaceIntersect.object != mouseDownFaceIntersect.object
+                        )
+                    ) {
+                        // If you clicked on a face, and moved off to mouseup, remove it
+                        removeTetrahedron(mouseDownFaceIntersect.object.parent);
+                    }
+
+                    // We are no longer currently rotating the camera
+                    mouseCurrentlyRotating = false;
+                    controls.enableRotate = true;
+
+                    // We no longer have a mousedown intersect
+                    mouseDownFaceIntersect = null;
+
+                    // We're definitely not removing right now
+                    mouseCurrentlyRemoving = false;
+                }
+
+                function getCurrentFaceIntersect() {
+                    mouseRaycaster.setFromCamera(mousePosition, camera);
+                    const intersects = mouseRaycaster.intersectObjects(getAllFaceTriangles());
+                    
+                    // The list is already sorted, so take the first one
+                    if (intersects.length > 0) {
+                        return intersects[0];
+                    } else {
+                        return null;
+                    }
+                }
+
+                function recenterCamera() {
+                    const distance = getAllTetrahedronGroups().length * 0.25;
+                    camera.position.z = 5 + distance;
+                }
+
+                function updateCamera() {
+                    camera.updateProjectionMatrix();
+                }
+
+                function render(time) {
+                    // Properly size the canvas
+                    resizeRendererToDisplaySize(renderer);
+
+                    // Rotate the tetrahedrons
+                    if (params.rotate == true) {
+                        time *= 0.0001; // convert to seconds
+                        getAllTetrahedronGroups().forEach((tetrahedron, n) => {
+                            const speed = .5 + n * 0.0001;
+                            const rot = time * speed;
+                            
+                            tetrahedron.rotation.x = rot;
+                            tetrahedron.rotation.y = rot;
+                            scene.updateMatrixWorld(true);
+                        });
+                    }
+
+                    // Highlight face triangles when moused over
+                    const faceTriangles = getAllFaceTriangles();
+
+                    // Set the visibility to false before checking for intersects
+                    currentFaceIntersect = null;
+                    faceTriangles.forEach((ft) => {
+                        if (ft.pulseTimer > 0) {
+                            ft.pulseTimer -= 1;
+
+                            // Pulse the face triangle
+                            ft.material.color = triangleBlockedColor;
+                            ft.material.opacity = ft.pulseTimer / 100;
+                            ft.material.transparent = true;
+                        } else {
+                            ft.material.transparent = false;
+                            ft.material.opacity = 100;
+                            ft.material.color = triangleHoverColor;
+                            ft.material.visible = false;
+                        }
+                    });
+                    
+                    // Check if we're currently rotating or removing
+                    if (mouseCurrentlyRotating == false) {
+                        // If the mouse is over a triangle, highlight it
+                        currentFaceIntersect = getCurrentFaceIntersect();
+                        
+                        // If the mouse selected a triangle, but then moved away, color it
+                        mouseCurrentlyRemoving = false;
+                        if (
+                            mouseDownFaceIntersect != null && 
+                            (
+                                currentFaceIntersect == null ||
+                                currentFaceIntersect.object != mouseDownFaceIntersect.object
+                            ) 
+                        ) {
+                            mouseCurrentlyRemoving = true;
+                            mouseDownFaceIntersect.object.material.color = triangleRemoveColor;
+                            mouseDownFaceIntersect.object.material.transparent = true;
+                            mouseDownFaceIntersect.object.material.opacity = 0.5;
+                            mouseDownFaceIntersect.object.material.visible = true;
+                        }
+
+                        // If object is highlighted and not being removed, color it
+                        if (currentFaceIntersect != null && !mouseCurrentlyRemoving) {
+                            currentFaceIntersect.object.material.color = triangleHoverColor;
+                            currentFaceIntersect.object.material.transparent = false;
+                            currentFaceIntersect.object.material.opacity = 1;
+                            currentFaceIntersect.object.material.visible = true;
+                        }
+                    }
+                
+                    requestAnimationFrame(render);
+                    renderer.render(scene, camera);
+
+                    // DEBUG
+                    // stats.update()
+                }
+            }
+
+            main();
+
+        </script>
+
+        <canvas id="c"></canvas>
+    </body>
+</html>
