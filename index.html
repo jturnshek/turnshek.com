@@ -51,14 +51,11 @@
             }
 
             function main() {
-                // Initialize the stats
-                // DEBUG
-                // const stats = Stats()
-                // document.body.appendChild(stats.dom)
-
                 // Set up the scene
                 const canvas = document.querySelector('#c');
                 const renderer = new THREE.WebGLRenderer({canvas, alpha: true});
+                renderer.physicallyCorrectLights = true;
+
                 const scene = new THREE.Scene();
                 scene.autoUpdate = false
 
@@ -69,11 +66,6 @@
                 const far = 5000;
                 const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
                 camera.position.z = 5;
-
-                // Set up lighting 
-                const light = new THREE.DirectionalLight(0xFFFFFF, 1);
-                light.position.set(-1, 2, 4);
-                scene.add(light);
                 
                 // Draw the skydome
                 const textureLoader = new THREE.TextureLoader();
@@ -106,11 +98,12 @@
                     0x00FF00, // green
                     0x0000FF, // blue
                 ]
-                const nodeColor = new THREE.Color(0xAE9473); // light tan
-                const edgeColor = new THREE.Color(0xFFFFFFF); // white
-                const triangleHoverColor = new THREE.Color(0xAE9473); // light tan
-                const triangleBlockedColor = new THREE.Color(0xFF0000); // red
-                const triangleRemoveColor = new THREE.Color(0xFF0000); // red
+
+                const nodeColor = new THREE.Color(0xCECECE);
+                const edgeColor = new THREE.Color(0xFEFEFE);
+                const triangleHoverColor = new THREE.Color(0x3C3B6E);
+                const triangleBlockedColor = new THREE.Color(0xB42033);
+                const triangleRemoveColor = new THREE.Color(0xB42033);
 
                 // Set up controls
                 const controls = new THREE.OrbitControls(camera, canvas);
@@ -118,19 +111,8 @@
                 // Handle mouse input
                 const mouseRaycaster = new THREE.Raycaster();
                 const mousePosition = new THREE.Vector2()
-                
-                // Set up the GUI
-                // DEBUG
-                // const gui = new dat.gui.GUI();
-                // gui.closed = true;
-                // gui.add(camera, 'fov', 0, 180).onChange(updateCamera);
-                // const minMaxGUIHelper = new MinMaxGUIHelper(camera, 'near', 'far', 0.1);
-                // gui.add(minMaxGUIHelper, 'min', 0.1, 50, 0.1).name('near').onChange(updateCamera);
-                // gui.add(minMaxGUIHelper, 'max', 50, 5000, 10).name('far').onChange(updateCamera);
-                // gui.add(params, "midpoints").name("show midpoints").onChange(setShowMidpoints);
-                // gui.add(params, "rotate").name("enable rotation");
-                // gui.add(params, "vertexSpheres").name("show vertices").onChange(setShowVertices);
 
+                // Load from local storage
                 const localStorageJson = loadFromLocalStorage();
                 if (localStorageJson && localStorageJson.length > 1) {
                     // If there are any tetrahedrons in local storage, set them back up
@@ -145,6 +127,18 @@
                     // Otherwise, add a tetrahedron
                     addTetrahedron(makeTetrahedron());
                 }
+
+                // Set up lighting 
+                const pointLight1 = new THREE.PointLight(0xFFFFFF, 1);
+                pointLight1.position.set(-100, 100, 100);
+                scene.add(pointLight1);
+
+                const pointLight2 = new THREE.PointLight(0xFFFFFF, 1);
+                pointLight2.position.set(100, -100, -100);
+                scene.add(pointLight2);
+
+                const ambientLight = new THREE.AmbientLight(0xFFFFFF, 3);
+                scene.add(ambientLight);
 
                 // Start the rendering process
                 requestAnimationFrame(render);
@@ -181,13 +175,19 @@
                     ]
 
                     // Add lines to the group
-                    const lineMaterial = new THREE.LineBasicMaterial({color: edgeColor});
+                    const lineMaterial = new THREE.LineBasicMaterial({
+                        color: edgeColor,
+                        linewidth: 2
+                    });
                     group.lines.forEach(line => {
                         const linePoints = [line.a, line.b]
                         const lineGeometry = new THREE.BufferGeometry().setFromPoints(linePoints);
                         const lineMesh = new THREE.Line(lineGeometry, lineMaterial);
                         lineMesh.name = "edge line";
+                        lineMesh.material.visible = false;
                         group.add(lineMesh);
+
+                        group.add(makeCylinderFromLine(line));
                     });
 
                     // Add a raycaster for each line
@@ -262,7 +262,12 @@
                     color = 0xFFFFFF, 
                     initialVisibility = true
                 ) {
-                    const sphereMaterial = new THREE.MeshBasicMaterial({color: color});
+                    // const sphereMaterial = new THREE.MeshBasicMaterial({color: color});
+                    const sphereMaterial = new THREE.MeshStandardMaterial({
+                        color: color,
+                        roughness: 0.5,
+                        metalness: 0.5,
+                    });
                     const sphereGeometry = new THREE.SphereGeometry(radius, 32, 32);
                     const sphereMesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
                     sphereMesh.material.visible = initialVisibility;
@@ -433,6 +438,29 @@
                     );
 
                     return raycaster;
+                }
+
+                function makeCylinderFromLine(line) {
+                    const cylinderCurve = new THREE.LineCurve3(line.a, line.b);
+                    
+                    const cylinderGeometry = new THREE.TubeGeometry(
+                        cylinderCurve, // the curve
+                        32, // the number of tubular segments
+                        0.01, // the radius of the tube
+                        16, // the number of radial segments
+                        true
+                    )
+
+                    // const cylinderMaterial = new THREE.MeshBasicMaterial({color: edgeColor});
+                    const cylinderMaterial = new THREE.MeshStandardMaterial({
+                        color: edgeColor,
+                        roughness: 0.5,
+                        metalness: 0.5,
+                    });
+                    const cylinderMesh = new THREE.Mesh(cylinderGeometry, cylinderMaterial);
+                    cylinderMesh.name = "pole";
+
+                    return cylinderMesh;
                 }
 
                 function makeVerticesFromTetrahedronJson(json) {
@@ -801,24 +829,9 @@
                     // Properly size the canvas
                     resizeRendererToDisplaySize(renderer);
 
-                    // Rotate the tetrahedrons
-                    if (params.rotate == true) {
-                        time *= 0.0001; // convert to seconds
-                        getAllTetrahedronGroups().forEach((tetrahedron, n) => {
-                            const speed = .5 + n * 0.0001;
-                            const rot = time * speed;
-                            
-                            tetrahedron.rotation.x = rot;
-                            tetrahedron.rotation.y = rot;
-                            scene.updateMatrixWorld(true);
-                        });
-                    }
-
                     // Highlight face triangles when moused over
                     const faceTriangles = getAllFaceTriangles();
-
-                    // Set the visibility to false before checking for intersects
-                    currentFaceIntersect = null;
+                
                     faceTriangles.forEach((ft) => {
                         if (ft.pulseTimer > 0) {
                             ft.pulseTimer -= 1;
@@ -826,16 +839,18 @@
                             // Pulse the face triangle
                             ft.material.color = triangleBlockedColor;
                             ft.material.opacity = ft.pulseTimer / 100;
+                            ft.material.visible = true;
                             ft.material.transparent = true;
                         } else {
                             ft.material.transparent = false;
                             ft.material.opacity = 100;
                             ft.material.color = triangleHoverColor;
                             ft.material.visible = false;
+                            ft.pulseTimer = 0;
                         }
                     });
-                    
-                    // Check if we're currently rotating or removing
+
+                    currentFaceIntersect = null;
                     if (mouseCurrentlyRotating == false) {
                         // If the mouse is over a triangle, highlight it
                         currentFaceIntersect = getCurrentFaceIntersect();
@@ -857,7 +872,11 @@
                         }
 
                         // If object is highlighted and not being removed, color it
-                        if (currentFaceIntersect != null && !mouseCurrentlyRemoving) {
+                        if (
+                            currentFaceIntersect != null && 
+                            !mouseCurrentlyRemoving &&
+                            currentFaceIntersect.object.pulseTimer < 1
+                        ) {
                             currentFaceIntersect.object.material.color = triangleHoverColor;
                             currentFaceIntersect.object.material.transparent = false;
                             currentFaceIntersect.object.material.opacity = 1;
@@ -867,9 +886,6 @@
                 
                     requestAnimationFrame(render);
                     renderer.render(scene, camera);
-
-                    // DEBUG
-                    // stats.update()
                 }
             }
 
