@@ -107,6 +107,11 @@
 
                 // Set up controls
                 const controls = new THREE.OrbitControls(camera, canvas);
+                controls.autoRotateSpeed = 0.0;
+                controls.autoRotateMaxSpeed = 0.22;
+                controls.autoRotate = true;
+                controls.autoRotateTimeout = null;
+                controls.autoRotatePauseTime = 5000;
 
                 // Handle mouse input
                 const mouseRaycaster = new THREE.Raycaster();
@@ -697,6 +702,11 @@
                 );
 
                 function handleStartClick() {
+                    // Stop rotating
+                    clearTimeout(controls.autoRotateTimeout);
+                    controls.autoRotateSpeed = 0;
+                    controls.autoRotate = false;
+
                     // If there is not a current face intersect, do nothing
                     if (currentFaceIntersect == null) {
                         mouseDownFaceIntersect = null;
@@ -756,6 +766,12 @@
                 );
 
                 function handleStopClick() {
+                    // Get the rotation timer started
+                    controls.autoRotateTimeout = setTimeout(function() {
+                        controls.autoRotateSpeed = 0.0;
+                        controls.autoRotate = true;
+                    }, controls.autoRotatePauseTime);
+
                     if (mouseDownFaceIntersect == null && currentFaceIntersect == null) {
                             // If you clicked in space, you were just rotating
 
@@ -885,6 +901,13 @@
                     }
                 
                     requestAnimationFrame(render);
+
+                    // Handle the rotation
+                    controls.update();
+                    if (controls.autoRotateSpeed < controls.autoRotateMaxSpeed) {
+                        controls.autoRotateSpeed += 0.0002;
+                    }
+                    
                     renderer.render(scene, camera);
                 }
             }
