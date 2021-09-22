@@ -116,6 +116,9 @@
                 // Handle mouse input
                 const mouseRaycaster = new THREE.Raycaster();
                 const mousePosition = new THREE.Vector2()
+                mousePosition.x = 1;
+                mousePosition.y = 1;
+                
 
                 // Load from local storage
                 const localStorageJson = loadFromLocalStorage();
