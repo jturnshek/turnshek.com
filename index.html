@@ -178,6 +178,12 @@
                             new THREE.Vector3(v[9].toFixed(10), v[10].toFixed(10), v[11].toFixed(10))
                         ]
                     } else {
+                        for (let i = 0; i < vertices.length; i++) {
+                            if (typeof vertices[i].x !== 'number' || typeof vertices[i].y !== 'number' || typeof vertices[i].z !== 'number') {
+                                console.error('Vertex properties x, y, and z must be numbers');
+                                return;
+                            }
+                        }
                         group.worldVertices = vertices.map(v => new THREE.Vector3(v.x.toFixed(10), v.y.toFixed(10), v.z.toFixed(10)));
                     }
 
