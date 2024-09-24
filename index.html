@@ -579,10 +579,6 @@
                     if (!dupe) {
                         // Save the tetrahedron to the json list
                         const vertexJson = [];
-                        if (!tetrahedronGroup.worldVertices) {
-                            console.error('worldVertices property is undefined');
-                            return;
-                        }
                         tetrahedronGroup.worldVertices.forEach(vertex => {
                             vertexJson.push({
                                 "x": vertex.x,
