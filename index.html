@@ -172,13 +172,13 @@
 
                         const v = initialGeometry.attributes.position.array;
                         group.worldVertices = [
-                            new THREE.Vector3(v[0], v[1], v[2]),
-                            new THREE.Vector3(v[3], v[4], v[5]),
-                            new THREE.Vector3(v[6], v[7], v[8]),
-                            new THREE.Vector3(v[9], v[10], v[11])
+                            new THREE.Vector3(v[0].toFixed(10), v[1].toFixed(10), v[2].toFixed(10)),
+                            new THREE.Vector3(v[3].toFixed(10), v[4].toFixed(10), v[5].toFixed(10)),
+                            new THREE.Vector3(v[6].toFixed(10), v[7].toFixed(10), v[8].toFixed(10)),
+                            new THREE.Vector3(v[9].toFixed(10), v[10].toFixed(10), v[11].toFixed(10))
                         ]
                     } else {
-                        group.worldVertices = vertices;
+                        group.worldVertices = vertices.map(v => new THREE.Vector3(v.x.toFixed(10), v.y.toFixed(10), v.z.toFixed(10)));
                     }
 
                     // Create a line between each vertex
@@ -920,6 +920,15 @@
                         controls.autoRotateSpeed += 0.0002;
                     }
                     
+                    // Correct any accumulated positional errors in isohedrons
+                    getAllTetrahedronGroups().forEach(group => {
+                        group.worldVertices.forEach(vertex => {
+                            vertex.x = parseFloat(vertex.x.toFixed(10));
+                            vertex.y = parseFloat(vertex.y.toFixed(10));
+                            vertex.z = parseFloat(vertex.z.toFixed(10));
+                        });
+                    });
+
                     renderer.render(scene, camera);
                 }
             }
