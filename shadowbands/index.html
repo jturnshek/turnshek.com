@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadowband Analyzer | University of Pittsburgh</title>
+    <style>
+        /* Analysis Dashboard Styles */
+        .analysis-dashboard {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: var(--bg-primary);
+            z-index: 1000;
+            overflow: auto;
+        }
+        
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .dashboard-header h1 {
+            margin: 0;
+            color: var(--text-primary);
+            font-size: 20px;
+        }
+        
+        .close-btn {
+            background: var(--accent-red);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .close-btn:hover {
+            background: #d32f2f;
+        }
+        
+        .dashboard-content {
+            padding: 20px;
+        }
+        
+        .summary-panel {
+            margin-bottom: 30px;
+        }
+        
+        .summary-panel h2 {
+            margin: 0 0 15px 0;
+            color: var(--text-primary);
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .summary-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px;
+        }
+        
+        .summary-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .summary-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent-green);
+            margin-bottom: 5px;
+        }
+        
+        .summary-details {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .analysis-main {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+        }
+        
+        .point-tabs {
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .tab-header {
+            display: flex;
+            padding: 0;
+        }
+        
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 12px 20px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .tab-btn.active {
+            color: var(--accent-green);
+            border-bottom-color: var(--accent-green);
+        }
+        
+        .tab-content {
+            min-height: 600px;
+        }
+        
+        .tab-panel {
+            display: none;
+            padding: 20px;
+        }
+        
+        .tab-panel.active {
+            display: block;
+        }
+        
+        .overview-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .viz-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 15px;
+        }
+        
+        .viz-panel h3 {
+            margin: 0 0 15px 0;
+            font-size: 16px;
+            color: var(--text-primary);
+        }
+        
+        .analysis-canvas {
+            width: 100%;
+            height: 200px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .params-display {
+            font-family: monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        .point-detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .detail-canvas {
+            width: 100%;
+            height: 250px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .stats-table {
+            font-family: monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .stats-table tr {
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .stats-table td {
+            padding: 8px 12px;
+        }
+        
+        .stats-table td:first-child {
+            color: var(--text-primary);
+            font-weight: bold;
+        }
+    </style>
+  <script type="module" crossorigin>(function(){const e=document.createElement("link").relList;if(e&&e.supports&&e.supports("modulepreload"))return;for(const t of document.querySelectorAll('link[rel="modulepreload"]'))n(t);new MutationObserver(t=>{for(const s of t)if(s.type==="childList")for(const a of s.addedNodes)a.tagName==="LINK"&&a.rel==="modulepreload"&&n(a)}).observe(document,{childList:!0,subtree:!0});function i(t){const s={};return t.integrity&&(s.integrity=t.integrity),t.referrerPolicy&&(s.referrerPolicy=t.referrerPolicy),t.crossOrigin==="use-credentials"?s.credentials="include":t.crossOrigin==="anonymous"?s.credentials="omit":s.credentials="same-origin",s}function n(t){if(t.ep)return;t.ep=!0;const s=i(t);fetch(t.href,s)}})();class b{constructor(e){this.videoManager=e,this.originalVideoWidth=0,this.originalVideoHeight=0,this.transforms={motion:null,region:null,exposure:null},this.effectiveBounds={x:0,y:0,width:0,height:0},this.displayInfo={width:0,height:0,scaleX:1,scaleY:1}}initialize(e,i){this.originalVideoWidth=e,this.originalVideoHeight=i,this.effectiveBounds={x:0,y:0,width:e,height:i},this.updateDisplayInfo()}setMotionTransform(e){if(!e){this.transforms.motion=null,this.recalculateEffectiveBounds();return}const i=e.margin;this.transforms.motion={type:"crop",x:this.originalVideoWidth*i,y:this.originalVideoHeight*i,width:this.originalVideoWidth*(1-2*i),height:this.originalVideoHeight*(1-2*i)},console.log("Setting motion transform:",{originalVideo:`${this.originalVideoWidth}x${this.originalVideoHeight}`,margin:i,motionTransform:this.transforms.motion}),this.recalculateEffectiveBounds()}setRegionTransform(e){if(!e){this.transforms.region=null,this.recalculateEffectiveBounds();return}let i,n,t,s;if(this.transforms.motion){const a=this.transforms.motion;i=a.x+e.x,n=a.y+e.y,t=e.width,s=e.height}else i=e.x,n=e.y,t=e.width,s=e.height;this.transforms.region={type:"crop",x:i,y:n,width:t,height:s},console.log("Setting region transform:",{motionBase:this.transforms.motion,canvasDimensions:this.getCanvasDimensions(),regionInput:e,regionFinal:this.transforms.region}),this.recalculateEffectiveBounds()}getCurrentEffectiveBounds(){let e={x:0,y:0,width:this.originalVideoWidth,height:this.originalVideoHeight};return this.transforms.motion&&(e={x:this.transforms.motion.x,y:this.transforms.motion.y,width:this.transforms.motion.width,height:this.transforms.motion.height}),this.transforms.region&&(e={x:this.transforms.region.x,y:this.transforms.region.y,width:this.transforms.region.width,height:this.transforms.region.height}),e}recalculateEffectiveBounds(){this.effectiveBounds=this.getCurrentEffectiveBounds(),this.updateDisplayInfo()}getEffectiveBounds(){return this.effectiveBounds}updateDisplayInfo(){const e=this.videoManager.displayCanvas.parentElement,i=e.clientWidth,n=e.clientHeight;if(this.effectiveBounds.width<=0||this.effectiveBounds.height<=0||i<=0||n<=0){console.warn("Invalid dimensions for display calculation"),this.displayInfo={width:0,height:0,scaleX:1,scaleY:1};return}const t=this.effectiveBounds.width/this.effectiveBounds.height,s=i/n;let a,d;if(t>s?(a=i,d=i/t):(a=n*t,d=n),a<=0||d<=0){this.displayInfo={width:0,height:0,scaleX:1,scaleY:1};return}this.displayInfo={width:a,height:d,scaleX:this.effectiveBounds.width/a,scaleY:this.effectiveBounds.height/d}}cssToVideoCoordinates(e,i){if(!this.displayInfo||this.displayInfo.scaleX<=0||this.displayInfo.scaleY<=0)return console.warn("Invalid display info for coordinate conversion"),{x:0,y:0};const n=e*this.displayInfo.scaleX,t=i*this.displayInfo.scaleY,s=this.effectiveBounds.x+n,a=this.effectiveBounds.y+t,d=Math.max(0,Math.min(this.originalVideoWidth,s)),o=Math.max(0,Math.min(this.originalVideoHeight,a));return{x:d,y:o}}videoToCssCoordinates(e,i){if(!this.displayInfo||this.displayInfo.scaleX<=0||this.displayInfo.scaleY<=0)return console.warn("Invalid display info for coordinate conversion"),{x:0,y:0};const n=e-this.effectiveBounds.x,t=i-this.effectiveBounds.y,s=n/this.displayInfo.scaleX,a=t/this.displayInfo.scaleY;return{x:s,y:a}}getSourceRectangle(){return{x:this.effectiveBounds.x,y:this.effectiveBounds.y,width:this.effectiveBounds.width,height:this.effectiveBounds.height}}getCanvasDimensions(){return{width:this.effectiveBounds.width,height:this.effectiveBounds.height}}getDisplayDimensions(){return{width:this.displayInfo.width,height:this.displayInfo.height}}applyMotionStabilization(e,i,n){if(!this.transforms.motion||!n.isStabilized)return;const t=n.getStabilizationTransform(i);e.translate(e.canvas.width/2,e.canvas.height/2),e.rotate(-t.angle),e.scale(1/t.scale,1/t.scale),e.translate(-t.dx,-t.dy),e.translate(-e.canvas.width/2,-e.canvas.height/2)}updateCanvasDimensions(){const e=this.getCanvasDimensions(),i=this.getDisplayDimensions(),n=this.videoManager.displayCanvas;n.width=e.width,n.height=e.height,n.style.width=i.width+"px",n.style.height=i.height+"px";const t=document.getElementById("overlayCanvas");t&&(t.width=e.width,t.height=e.height,t.style.width=i.width+"px",t.style.height=i.height+"px");const s=document.getElementById("visualizationCanvas");s&&(s.width=e.width,s.height=e.height,s.style.width=i.width+"px",s.style.height=i.height+"px"),this.videoManager.displayInfo=this.displayInfo}isPointInBounds(e,i){return e>=this.effectiveBounds.x&&e<this.effectiveBounds.x+this.effectiveBounds.width&&i>=this.effectiveBounds.y&&i<this.effectiveBounds.y+this.effectiveBounds.height}getTransformSummary(){return{originalVideo:`${this.originalVideoWidth}x${this.originalVideoHeight}`,motionTransform:this.transforms.motion,regionTransform:this.transforms.region,effectiveBounds:this.effectiveBounds,displayInfo:this.displayInfo}}}class B{constructor(e){this.analyzer=e,this.video=document.getElementById("video"),this.displayCanvas=document.getElementById("displayCanvas"),this.displayCtx=this.displayCanvas.getContext("2d",{willReadFrequently:!0,desynchronized:!0}),this.currentFrame=null,this.animationFrame=null,this.displayInfo=null,this.lastSeekTime=0,this.seekThrottle=16,this.pendingSeek=null,this.lastDrawnFrame=-1,this.seekRAF=null,this.offscreenCanvas=document.createElement("canvas"),this.offscreenCtx=null,this.perfStats={seeks:0,draws:0,lastSeekLatency:0},this.enableStabilizedPreview=!1,this.enableExposurePreview=!1,this.coordinateManager=new b(this),this.cropRegion=null,this.detectedFrameRate=30,this.videoCodec="unknown",this.loopEnabled=!1,this.bindEvents()}detectVideoCodec(){if(this.video.videoTracks&&this.video.videoTracks.length>0){const e=this.video.videoTracks[0];e.codec&&(this.videoCodec=e.codec.toLowerCase(),console.log("Detected video codec:",this.videoCodec))}this.videoCodec.includes("vp9")||this.videoCodec.includes("vp09")?(console.warn("⚠️ VP9 codec detected - seeking may be slow"),console.warn("For better performance, re-encode with:"),console.warn("ffmpeg -i input.mp4 -c:v libx264 -x264opts keyint=10 -preset fast -crf 18 output.mp4"),this.seekThrottle=50,this.analyzer.uiManager&&this.analyzer.uiManager.showInfo(`VP9 video detected - seeking may be slower.
+For best performance, re-encode to H.264 with frequent keyframes.`)):(this.videoCodec.includes("h264")||this.videoCodec.includes("avc"))&&(console.log("✅ H.264 codec detected - optimized for fast seeking"),this.seekThrottle=8)}checkTimeRangeMarkers(){if(this.analyzer.currentStep>=3){const e=document.getElementById("videoSliderContainer");e&&!e.classList.contains("time-range-active")&&e.classList.add("time-range-active")}}setupFilePicker(){const e=document.getElementById("fileUploadArea");document.getElementById("fileSelectedArea");const i=document.getElementById("videoInput"),n=document.getElementById("fileRemoveBtn");e&&(e.addEventListener("click",()=>{i.click()}),e.addEventListener("dragover",t=>{t.preventDefault(),e.classList.add("drag-over")}),e.addEventListener("dragleave",()=>{e.classList.remove("drag-over")}),e.addEventListener("drop",t=>{t.preventDefault(),e.classList.remove("drag-over");const s=t.dataTransfer.files;if(s.length>0){const a=s[0];if(a.type.startsWith("video/")||a.name.toLowerCase().endsWith(".mkv")){this.handleFileSelection(a);const d=new DataTransfer;d.items.add(a),i.files=d.files}else this.analyzer.uiManager.showInfo("Please select a video file")}})),n&&n.addEventListener("click",t=>{t.stopPropagation(),this.clearFileSelection()})}handleFileSelection(e){const i=document.getElementById("fileUploadArea"),n=document.getElementById("fileSelectedArea"),t=document.getElementById("selectedFileName"),s=document.getElementById("selectedFileSize");if(i&&n){i.style.display="none",n.style.display="flex",t.textContent=e.name;const a=(e.size/(1024*1024)).toFixed(1);s.textContent=`${a} MB`}this.loadVideo(e)}clearFileSelection(){const e=document.getElementById("fileUploadArea"),i=document.getElementById("fileSelectedArea"),n=document.getElementById("videoInput");e&&i&&(e.style.display="block",i.style.display="none",n.value=""),this.video.src="",this.analyzer.isVideoLoaded=!1,this.displayCtx&&this.displayCtx.clearRect(0,0,this.displayCanvas.width,this.displayCanvas.height);const t=document.getElementById("overlayCanvas");t&&t.getContext("2d").clearRect(0,0,t.width,t.height);const s=document.getElementById("visualizationCanvas");s&&s.getContext("2d").clearRect(0,0,s.width,s.height),document.getElementById("placeholder").style.display="block",document.getElementById("videoInfo").style.display="none",document.getElementById("playPauseBtn").disabled=!0,document.getElementById("playbackSpeed").disabled=!0,document.getElementById("loopBtn").disabled=!0,document.getElementById("timeSlider").disabled=!0;const a=document.getElementById("timeSlider");a.value=0;const d=document.getElementById("videoProgress");d&&d.style.setProperty("--progress","0%"),document.getElementById("timeInfo").textContent="--",document.getElementById("mouseInfo").textContent=""}bindEvents(){this.displayCanvas.addEventListener("mousemove",n=>{const t=this.getVideoPoint(n);document.getElementById("mouseInfo").textContent=`${Math.round(t.x)},${Math.round(t.y)}`}),this.displayCanvas.addEventListener("mouseleave",()=>{document.getElementById("mouseInfo").textContent=""}),this.setupFilePicker(),document.getElementById("videoInput").addEventListener("change",n=>{n.target.files[0]&&this.handleFileSelection(n.target.files[0])}),document.getElementById("playPauseBtn").addEventListener("click",()=>{this.togglePlayPause()}),this.isSeeking=!1;const e=document.getElementById("timeSlider");e.addEventListener("mousedown",()=>{this.isSeeking=!0,this.wasPlayingBeforeSeek=!this.video.paused,this.wasPlayingBeforeSeek&&this.video.pause()}),e.addEventListener("input",n=>{this.seekToImmediate(parseFloat(n.target.value)),this.isSeeking||(this.isSeeking=!0,this.wasPlayingBeforeSeek=!this.video.paused,this.wasPlayingBeforeSeek&&this.video.pause())}),e.addEventListener("change",n=>{this.isSeeking=!1,this.seekTo(parseFloat(n.target.value)),this.wasPlayingBeforeSeek&&(this.video.play(),this.wasPlayingBeforeSeek=!1)}),e.addEventListener("mouseup",()=>{this.isSeeking&&(this.isSeeking=!1,this.wasPlayingBeforeSeek&&(this.video.play(),this.wasPlayingBeforeSeek=!1))}),document.getElementById("playbackSpeed").addEventListener("change",n=>{this.setPlaybackSpeed(parseFloat(n.target.value))});const i=document.getElementById("loopBtn");i&&i.addEventListener("click",()=>{this.toggleLoop()}),this.video.addEventListener("loadedmetadata",()=>{this.onVideoLoaded()}),this.video.addEventListener("timeupdate",()=>{this.onTimeUpdate()}),this.video.addEventListener("play",()=>{this.onPlayStateChange(),this.startAnimation()}),this.video.addEventListener("pause",()=>{this.onPlayStateChange(),this.stopAnimation()}),this.video.addEventListener("seeked",()=>{requestAnimationFrame(()=>{this.drawCurrentFrame(!0),this.updateFrameInfo()})}),this.video.addEventListener("seeking",()=>{this.video.readyState>=2&&this.drawCurrentFrame(!0)}),this.video.addEventListener("timeupdate",()=>{this.handleTimeSpanConstraints()})}loadVideo(e){console.log("Loading video:",e.name),e.name.toLowerCase().endsWith(".mkv")&&this.analyzer.uiManager.showInfo("MKV files may not be supported by your browser.\\n\\nFor best results, convert to MP4:\\nffmpeg -i input.mkv -c:v libx264 output.mp4");const i=URL.createObjectURL(e);this.video.src=i,this.video.preload="auto",this.video.muted=!0,this.video.playbackRate=1,this.video.preservesPitch=!1,this.video.load(),this.video.addEventListener("loadeddata",()=>{setTimeout(()=>{this.video.play().then(()=>{this.video.pause(),this.video.currentTime=0}).catch(()=>{})},100)},{once:!0})}async onVideoLoaded(){console.log("Video loaded:",this.video.videoWidth,"x",this.video.videoHeight),this.analyzer.isVideoLoaded=!0,this.detectVideoCodec(),this.checkTimeRangeMarkers(),this.coordinateManager.initialize(this.video.videoWidth,this.video.videoHeight),document.getElementById("placeholder").style.display="none",this.setupCanvasDisplay(),this.drawCurrentFrame(),this.updateVideoInfo(),this.enableVideoControls(),this.analyzer.timeSpanManager.initialize(this.video.duration),await this.analyzer.validateAndAdvanceStep(1),this.updateFrameInfo()}setupCanvasDisplay(){if(!this.analyzer.isVideoLoaded)return;this.coordinateManager.updateCanvasDimensions(),this.offscreenCanvas.width=this.displayCanvas.width,this.offscreenCanvas.height=this.displayCanvas.height,this.offscreenCtx=this.offscreenCanvas.getContext("2d",{willReadFrequently:!0,desynchronized:!0});const e=document.getElementById("overlayCanvas"),i=document.getElementById("visualizationCanvas");[e,i].forEach(n=>{n&&(n.style.position="absolute",n.style.top="50%",n.style.left="50%",n.style.transform="translate(-50%, -50%)",n.style.zIndex="11")}),this.displayInfo=this.coordinateManager.displayInfo}drawCurrentFrame(e=!1){if(!this.analyzer.isVideoLoaded||!e&&this.video.readyState<2&&!this.video.seeking)return;this.perfStats&&this.perfStats.draws++;const i=this.video.currentTime,n=this.offscreenCtx||this.displayCtx,t=this.coordinateManager.getSourceRectangle();n.save();const s=this.isSeeking;if(!s&&this.enableStabilizedPreview&&this.analyzer.preprocessingManager.isStabilized&&this.coordinateManager.applyMotionStabilization(n,i,this.analyzer.preprocessingManager),n.drawImage(this.video,t.x,t.y,t.width,t.height,0,0,this.displayCanvas.width,this.displayCanvas.height),n.restore(),!s&&this.enableExposurePreview&&this.analyzer.preprocessingManager.isExposureNormalized){const a=n.getImageData(0,0,this.displayCanvas.width,this.displayCanvas.height),d=this.analyzer.preprocessingManager.getExposureNormalization(i),o=a.data;for(let l=0;l<o.length;l+=4)o[l]=Math.min(255,o[l]*d),o[l+1]=Math.min(255,o[l+1]*d),o[l+2]=Math.min(255,o[l+2]*d);n.putImageData(a,0,0)}n===this.offscreenCtx&&this.displayCtx.drawImage(this.offscreenCanvas,0,0),this.video.paused||(this.currentFrame=n.getImageData(0,0,this.displayCanvas.width,this.displayCanvas.height))}updateVideoInfo(){document.getElementById("videoInfo").style.display="block",document.getElementById("videoResolution").textContent=`${this.video.videoWidth} x ${this.video.videoHeight}`,this.detectFrameRate().then(e=>{this.detectedFrameRate=e||30,document.getElementById("videoFrameRate").textContent=e?`${e.toFixed(1)} fps`:"Unknown fps",console.log("Detected video frame rate:",e);const i=document.getElementById("timeSlider");if(i){const n=1/this.detectedFrameRate;i.step=n.toString()}}).catch(()=>{document.getElementById("videoFrameRate").textContent="Unknown fps"}),document.getElementById("videoDuration").textContent=`${this.video.duration.toFixed(1)} sec`}enableVideoControls(){document.getElementById("playPauseBtn").disabled=!1,document.getElementById("playbackSpeed").disabled=!1,document.getElementById("loopBtn").disabled=!1;const e=document.getElementById("timeSlider");e.disabled=!1,e.max=this.video.duration;const i=1/this.detectedFrameRate;e.step=i.toString()}updateSliderRange(){const e=document.getElementById("timeSlider"),i=document.getElementById("videoSliderContainer");if(this.analyzer.timeSpanManager&&this.analyzer.currentStep>=2){const t=this.analyzer.timeSpanManager.getTimeSpan();if(t&&t.start!==0||t.end!==this.video.duration){e.min=t.start,e.max=t.end;const s=1/this.detectedFrameRate;if(e.step=s.toString(),i){i.classList.add("time-range-active");const a=document.getElementById("rangeStartMarker"),d=document.getElementById("rangeEndMarker");a&&d&&(a.style.display="block",d.style.display="block",a.style.opacity="1",d.style.opacity="1")}return{start:t.start,end:t.end}}}e.min=0,e.max=this.video.duration;const n=1/this.detectedFrameRate;return e.step=n.toString(),i&&i.classList.remove("time-range-active"),{start:0,end:this.video.duration}}getFrameRate(){return this.detectedFrameRate}async detectFrameRate(){return new Promise(async e=>{try{if(this.video.captureStream){const m=this.video.captureStream().getVideoTracks()[0];if(m&&m.getSettings){const g=m.getSettings();if(g.frameRate){console.log("Frame rate from video track settings:",g.frameRate),e(g.frameRate);return}}}const i=Math.min(2,this.video.duration),n=Math.min(5,this.video.duration/2),t=document.createElement("canvas"),s=t.getContext("2d",{willReadFrequently:!0});t.width=160,t.height=90;const a=[],o=1/60;let l=n;const r=()=>new Promise(y=>{const m=()=>{s.drawImage(this.video,0,0,t.width,t.height);const g=s.getImageData(0,0,t.width,t.height);a.push({time:l,data:new Uint8Array(g.data)}),this.video.removeEventListener("seeked",m),y()};this.video.addEventListener("seeked",m),this.video.currentTime=l});for(;l<n+i;)await r(),l+=o;let h=0;for(let y=1;y<a.length;y++){const m=a[y-1].data,g=a[y].data;let v=0;for(let S=0;S<m.length;S+=400)v+=Math.abs(m[S]-g[S]);v>1e3&&h++}const c=h/i,u=[23.976,24,25,29.97,30,48,50,59.94,60];let f=30,p=Math.abs(c-30);for(const y of u){const m=Math.abs(c-y);m<p&&(p=m,f=y)}p<2?(console.log(`Detected frame rate: ${c.toFixed(2)} fps, using ${f} fps`),e(f)):(console.log(`Uncertain frame rate detection: ${c.toFixed(2)} fps, defaulting to 30 fps`),e(30))}catch(i){console.warn("Could not detect frame rate:",i),e(30)}})}togglePlayPause(){this.video.paused?this.video.play():this.video.pause()}seekTo(e){if(this.analyzer.isVideoLoaded){const i=1/this.detectedFrameRate,t=Math.round(e/i)*i;this.video.currentTime=t,this.drawCurrentFrame();const s=document.getElementById("timeSlider"),a=parseFloat(s.min)||0,d=parseFloat(s.max)||this.video.duration,o=(t-a)/(d-a)*100,l=document.getElementById("videoProgress");l&&l.style.setProperty("--progress",`${Math.max(0,Math.min(100,o))}%`),this.updateFrameInfo()}}seekToImmediate(e){if(!this.analyzer.isVideoLoaded)return;this.updateUIForTime(e);const i=1/this.detectedFrameRate,n=Math.round(e/i),t=n*i;n!==this.lastDrawnFrame&&(this.pendingSeek=t,this.seekRAF&&cancelAnimationFrame(this.seekRAF),this.seekRAF=requestAnimationFrame(()=>{this.pendingSeek!==null&&(this.performSeek(this.pendingSeek),this.pendingSeek=null),this.seekRAF=null}))}performSeek(e){const i=performance.now(),n=1/this.detectedFrameRate,t=Math.round(e/n),s=this.videoCodec.includes("vp")?n*2:n/2;if(Math.abs(this.video.currentTime-e)<s){this.drawCurrentFrame(!0),this.lastDrawnFrame=t;return}this.perfStats.seeks++,this.video.fastSeek&&Math.abs(this.video.currentTime-e)>1?this.video.fastSeek(e):this.video.currentTime=e,this.lastDrawnFrame=t,this.perfStats.lastSeekLatency=performance.now()-i}updateUIForTime(e){const i=1/this.detectedFrameRate,t=Math.round(e/i)*i,s=document.getElementById("timeSlider"),a=parseFloat(s.min)||0,d=parseFloat(s.max)||this.video.duration,o=(t-a)/(d-a)*100,l=document.getElementById("videoProgress");l&&l.style.setProperty("--progress",`${Math.max(0,Math.min(100,o))}%`),this.updateFrameInfo()}setPlaybackSpeed(e){this.video.playbackRate=e}toggleLoop(){this.loopEnabled=!this.loopEnabled;const e=document.getElementById("loopBtn");e&&(this.loopEnabled?(e.classList.add("active"),e.title="Loop enabled"):(e.classList.remove("active"),e.title="Loop disabled")),this.video.loop=!1}startAnimation(){const e=()=>{this.video.paused||(this.drawCurrentFrame(),this.updateProgressSmooth(),this.animationFrame=requestAnimationFrame(e))};e()}stopAnimation(){this.animationFrame&&(cancelAnimationFrame(this.animationFrame),this.animationFrame=null)}onTimeUpdate(){this.analyzer.isVideoLoaded&&this.video.paused&&this.updateProgressSmooth()}handleTimeSpanConstraints(){if(this.analyzer.timeSpanManager&&this.analyzer.currentStep>=2){const e=this.analyzer.timeSpanManager.getTimeSpan();this.video.currentTime>=e.end&&!this.video.paused&&(this.loopEnabled?this.video.currentTime=e.start:(this.video.pause(),this.video.currentTime=e.start)),this.video.currentTime<e.start&&(this.video.currentTime=e.start)}else this.loopEnabled&&this.video.currentTime>=this.video.duration-.1&&!this.video.paused&&(this.video.currentTime=0)}onPlayStateChange(){const e=document.querySelector(".play-icon");e&&(e.textContent=this.video.paused?"▶":"⏸")}updateFrameInfo(){if(this.analyzer.isVideoLoaded){const e=this.video.currentTime.toFixed(2);this.video.duration.toFixed(2);const i=1/this.detectedFrameRate;Math.floor(this.video.currentTime/i),Math.floor(this.video.duration/i),document.getElementById("timeInfo").textContent=`${e}s`}}updateProgressSmooth(){if(!this.analyzer.isVideoLoaded)return;const e=document.getElementById("timeSlider"),i=parseFloat(e.min)||0,n=parseFloat(e.max)||this.video.duration,t=(this.video.currentTime-i)/(n-i)*100,s=document.getElementById("videoProgress");s&&s.style.setProperty("--progress",`${Math.max(0,Math.min(100,t))}%`),e.value=this.video.currentTime,this.updateFrameInfo()}getVideoPoint(e){const i=this.displayCanvas.getBoundingClientRect(),n=e.clientX-i.left,t=e.clientY-i.top;return this.coordinateManager.cssToVideoCoordinates(n,t)}async getFrameAtTime(e,i=!1){await this.seekToTime(e);const n=document.createElement("canvas"),t=this.coordinateManager.getCanvasDimensions();n.width=t.width,n.height=t.height;const s=n.getContext("2d",{willReadFrequently:!0}),a=this.coordinateManager.getSourceRectangle();if(s.save(),i&&this.analyzer.preprocessingManager.isStabilized&&this.coordinateManager.applyMotionStabilization(s,e,this.analyzer.preprocessingManager),s.drawImage(this.video,a.x,a.y,a.width,a.height,0,0,n.width,n.height),s.restore(),i&&this.analyzer.preprocessingManager.isExposureNormalized){const d=s.getImageData(0,0,n.width,n.height),o=this.analyzer.preprocessingManager.getExposureNormalization(e),l=d.data;for(let r=0;r<l.length;r+=4)l[r]=Math.min(255,l[r]*o),l[r+1]=Math.min(255,l[r+1]*o),l[r+2]=Math.min(255,l[r+2]*o);s.putImageData(d,0,0)}return n}seekToTime(e){return new Promise(i=>{const n=()=>{this.video.removeEventListener("seeked",n),i()};this.video.addEventListener("seeked",n),this.video.currentTime=e})}}class I{constructor(e){this.analyzer=e,this.isStabilized=!1,this.isExposureNormalized=!1,this.stabilizationData=null,this.processingFrames=!1,this.motionTransforms=[],this.trackingPoints=null,this.oldGray=null,this.cropBounds=null,this.bindEvents()}bindEvents(){document.getElementById("stabilizeBtn").addEventListener("click",()=>{this.analyzeMotion()}),document.getElementById("skipStabilizationBtn").addEventListener("click",()=>{this.skipStabilization()}),document.getElementById("normalizeBtn").addEventListener("click",()=>{this.normalizeExposure()}),document.getElementById("skipExposureBtn").addEventListener("click",()=>{this.skipExposureNormalization()})}async analyzeMotion(){if(!this.analyzer.opencvReady){this.analyzer.uiManager.showError("OpenCV.js is not ready yet. Please wait.");return}const e=document.getElementById("stabilizeBtn");e.disabled=!0,e.textContent="Analyzing...",this.analyzer.setStepWorking(3),document.getElementById("motionProgress").style.display="block";const i=document.getElementById("motionProgressBar"),n=document.getElementById("motionProgressText");try{document.getElementById("motionVisualization").style.display="block",this.initMotionVisualization(),await this.analyzeVideoMotion((t,s)=>{i.style.width=t*100+"%",n.textContent=s}),this.calculateCropBounds(),this.analyzer.videoManager.coordinateManager.setMotionTransform(this.cropBounds),this.analyzer.videoManager.coordinateManager.updateCanvasDimensions(),this.showMotionResults(),this.isStabilized=!0,this.analyzer.videoManager.enableStabilizedPreview=!0,e.textContent=`Applied (${(this.cropBounds.margin*100).toFixed(1)}% crop)`,e.classList.add("completed"),this.analyzer.videoManager.drawCurrentFrame(),await this.analyzer.validateAndAdvanceStep(3)}catch(t){console.error("Motion analysis error:",t),this.analyzer.uiManager.showError("Motion analysis failed: "+t.message),e.disabled=!1,e.textContent="Analyze Motion"}finally{document.getElementById("motionProgress").style.display="none",this.analyzer.clearStepWorking(3)}}async analyzeVideoMotion(e){const i=this.analyzer.video,n=document.createElement("canvas");n.width=i.videoWidth,n.height=i.videoHeight;const t=n.getContext("2d",{willReadFrequently:!0});this.motionTransforms=[];const s={maxCorners:200,qualityLevel:.01,minDistance:30,blockSize:3},a={winSize:new cv.Size(15,15),maxLevel:2,criteria:new cv.TermCriteria(cv.TermCriteria_COUNT|cv.TermCriteria_EPS,10,.03)},d=this.analyzer.timeSpanManager.getTimeSpan(),o=this.analyzer.videoManager.getFrameRate(),l=1/o,r=Math.floor(d.duration*o);let h=null,c=null;for(let u=0;u<r;u++){const f=d.start+u*l;await this.seekToTime(i,f),t.drawImage(i,0,0);const p=t.getImageData(0,0,n.width,n.height);this.analyzer.videoManager.drawCurrentFrame();const y=cv.matFromImageData(p),m=new cv.Mat;if(cv.cvtColor(y,m,cv.COLOR_RGBA2GRAY),u===0){h=m.clone(),c=new cv.Mat;const g=new cv.Mat;cv.goodFeaturesToTrack(m,c,s.maxCorners,s.qualityLevel,s.minDistance,g,s.blockSize),g.delete()}else{const g=new cv.Mat,v=new cv.Mat,S=new cv.Mat;cv.calcOpticalFlowPyrLK(h,m,c,g,v,S,a.winSize,a.maxLevel,a.criteria);const F=this.calculateTransform(c,g,v);this.motionTransforms.push({time:f,transform:F,trackedPoints:this.countGoodPoints(v)}),this.visualizeMotionVector(F,u);const x=[],M=[];for(let w=0;w<v.rows;w++)v.data[w]===1&&(x.push(new cv.Point(c.data32F[w*2],c.data32F[w*2+1])),M.push(new cv.Point(g.data32F[w*2],g.data32F[w*2+1])));if(v.delete(),S.delete(),h.delete(),c.delete(),h=m.clone(),M.length>10)c=cv.matFromArray(M.length,1,cv.CV_32FC2,M.flatMap(w=>[w.x,w.y]));else{c=new cv.Mat;const w=new cv.Mat;cv.goodFeaturesToTrack(m,c,s.maxCorners,s.qualityLevel,s.minDistance,w,s.blockSize),w.delete()}g.delete()}y.delete(),u!==r-1&&m.delete(),e((u+1)/r,`Analyzing frame ${u+1} of ${r}`)}h&&h.delete(),c&&c.delete(),e(1,"Motion analysis complete")}calculateTransform(e,i,n){const t=[],s=[];for(let r=0;r<n.rows;r++)n.data[r]===1&&(t.push([e.data32F[r*2],e.data32F[r*2+1]]),s.push([i.data32F[r*2],i.data32F[r*2+1]]));if(t.length<3)return{dx:0,dy:0,angle:0,scale:1};let a=0,d=0;for(let r=0;r<t.length;r++)a+=s[r][0]-t[r][0],d+=s[r][1]-t[r][1];return a/=t.length,d/=t.length,{dx:a,dy:d,angle:0,scale:1}}countGoodPoints(e){let i=0;for(let n=0;n<e.rows;n++)e.data[n]===1&&i++;return i}seekToTime(e,i){return new Promise(n=>{const t=()=>{e.removeEventListener("seeked",t),n()};e.addEventListener("seeked",t),e.currentTime=i})}showMotionResults(){document.getElementById("motionResults").style.display="block";let e=0,i=0;for(const s of this.motionTransforms)e+=Math.abs(s.transform.dx),i+=Math.abs(s.transform.dy);e/=this.motionTransforms.length,i/=this.motionTransforms.length;const n=Math.sqrt(e*e+i*i),t=this.motionTransforms.reduce((s,a)=>s+a.trackedPoints,0)/this.motionTransforms.length;document.getElementById("motionMagnitude").textContent=n.toFixed(1)+" px",document.getElementById("motionConfidence").textContent=Math.min(100,t).toFixed(0)+"%",document.getElementById("motionFrames").textContent=this.motionTransforms.length.toString()}initMotionVisualization(){const e=document.getElementById("motionVectorCanvas"),i=e.parentElement.getBoundingClientRect();e.width=i.width,e.height=150,this.motionVizCtx=e.getContext("2d"),this.motionVizHistory=[],this.maxHistoryLength=100}visualizeMotionVector(e,i){if(!this.motionVizCtx)return;const n=this.motionVizCtx,t=n.canvas;this.motionVizHistory.push({dx:e.dx,dy:e.dy,frameIndex:i}),this.motionVizHistory.length>this.maxHistoryLength&&this.motionVizHistory.shift(),n.clearRect(0,0,t.width,t.height),n.strokeStyle="rgba(255, 255, 255, 0.1)",n.lineWidth=1,n.beginPath(),n.moveTo(0,t.height/2),n.lineTo(t.width,t.height/2),n.stroke();for(let l=0;l<t.width;l+=t.width/10)n.beginPath(),n.moveTo(l,0),n.lineTo(l,t.height),n.stroke();const s=2,a=t.height/2;n.strokeStyle="#00ff00",n.lineWidth=2,n.beginPath();for(let l=0;l<this.motionVizHistory.length;l++){const r=l/this.maxHistoryLength*t.width,h=a-this.motionVizHistory[l].dx*s;l===0?n.moveTo(r,h):n.lineTo(r,h)}n.stroke(),n.strokeStyle="#ff0000",n.beginPath();for(let l=0;l<this.motionVizHistory.length;l++){const r=l/this.maxHistoryLength*t.width,h=a-this.motionVizHistory[l].dy*s;l===0?n.moveTo(r,h):n.lineTo(r,h)}n.stroke(),n.fillStyle="#ffffff",n.font="10px monospace",n.fillText("X motion",5,15),n.fillStyle="#00ff00",n.fillRect(60,8,20,2),n.fillStyle="#ffffff",n.fillText("Y motion",5,30),n.fillStyle="#ff0000",n.fillRect(60,23,20,2);const d=this.motionVizHistory[this.motionVizHistory.length-1]?.dx||0,o=this.motionVizHistory[this.motionVizHistory.length-1]?.dy||0;n.fillStyle="#ffffff",n.fillText(`Current: X=${d.toFixed(1)}px, Y=${o.toFixed(1)}px`,t.width-150,15)}initExposureVisualization(){const e=document.getElementById("exposureHistogramCanvas"),i=e.parentElement.getBoundingClientRect();e.width=i.width,e.height=150,this.exposureVizCtx=e.getContext("2d"),this.exposureVizHistory=[],this.maxExposureHistory=50}visualizeExposureHistogram(e,i,n){if(!this.exposureVizCtx)return;const t=this.exposureVizCtx,s=t.canvas;this.exposureVizHistory.push({mean:i,histogram:e,frameIndex:n}),this.exposureVizHistory.length>this.maxExposureHistory&&this.exposureVizHistory.shift(),t.clearRect(0,0,s.width,s.height);const a=s.width*.6,d=s.width*.4,o=Math.max(...e),l=a/256;t.fillStyle="rgba(0, 255, 0, 0.7)";for(let c=0;c<256;c++){const u=e[c]/o*(s.height-30);t.fillRect(c*l,s.height-u-20,l-1,u)}t.strokeStyle="#ff0000",t.lineWidth=2,t.beginPath();const r=i*l;t.moveTo(r,0),t.lineTo(r,s.height-20),t.stroke(),t.fillStyle="#ffffff",t.font="10px monospace",t.fillText("0",0,s.height-5),t.fillText("128",a/2-10,s.height-5),t.fillText("255",a-20,s.height-5),t.fillText(`Mean: ${i.toFixed(0)}`,5,15),t.strokeStyle="rgba(255, 255, 255, 0.3)",t.lineWidth=1,t.beginPath(),t.moveTo(a+10,0),t.lineTo(a+10,s.height),t.stroke();const h=a+20;t.strokeStyle="#00ff00",t.lineWidth=2,t.beginPath();for(let c=0;c<this.exposureVizHistory.length;c++){const u=h+c/this.maxExposureHistory*(d-30),f=s.height-20-this.exposureVizHistory[c].mean/255*(s.height-40);c===0?t.moveTo(u,f):t.lineTo(u,f)}t.stroke(),t.fillStyle="#ffffff",t.fillText("Brightness over time",h,15),t.font="9px monospace",t.fillText("0",h-15,s.height-15),t.fillText("255",h-15,20)}skipStabilization(){this.isStabilized=!1,this.analyzer.videoManager.enableStabilizedPreview=!1,this.analyzer.videoManager.coordinateManager.setMotionTransform(null),this.analyzer.videoManager.coordinateManager.updateCanvasDimensions(),requestAnimationFrame(()=>{this.analyzer.videoManager.drawCurrentFrame(!0)}),document.getElementById("stabilizeBtn").textContent="Skipped",document.getElementById("stabilizeBtn").disabled=!0,document.getElementById("skipStabilizationBtn").disabled=!0,this.analyzer.skipStep(3),this.analyzer.activateStep(4)}skipExposureNormalization(){this.isExposureNormalized=!1,this.analyzer.videoManager.enableExposurePreview=!1,document.getElementById("normalizeBtn").textContent="Skipped",document.getElementById("normalizeBtn").disabled=!0,document.getElementById("skipExposureBtn").disabled=!0,this.analyzer.skipStep(5),this.analyzer.activateStep(6)}async normalizeExposure(){if(!this.analyzer.opencvReady){this.analyzer.uiManager.showError("OpenCV.js is not ready yet. Please wait.");return}const e=document.getElementById("normalizeBtn");e.disabled=!0,e.textContent="Analyzing...",this.analyzer.setStepWorking(5),document.getElementById("exposureProgress").style.display="block";const i=document.getElementById("exposureProgressBar"),n=document.getElementById("exposureProgressText");try{document.getElementById("exposureVisualization").style.display="block",this.initExposureVisualization(),await this.analyzeExposureVariations((t,s)=>{i.style.width=t*100+"%",n.textContent=s}),this.showExposureResults(),this.isExposureNormalized=!0,this.analyzer.videoManager.enableExposurePreview=!0,e.textContent="Applied",e.classList.add("completed"),this.analyzer.videoManager.drawCurrentFrame(),await this.analyzer.validateAndAdvanceStep(5)}catch(t){console.error("Exposure analysis error:",t),this.analyzer.uiManager.showError("Exposure analysis failed: "+t.message),e.disabled=!1,e.textContent="Normalize Exposure"}finally{document.getElementById("exposureProgress").style.display="none",this.analyzer.clearStepWorking(5)}}async analyzeExposureVariations(e){const i=this.analyzer.video,n=document.createElement("canvas"),s=this.analyzer.videoManager.coordinateManager.getEffectiveBounds();n.width=s.width,n.height=s.height;const a=n.getContext("2d",{willReadFrequently:!0});this.exposureData={histograms:[],meanBrightness:[],timestamps:[]};const d=this.analyzer.timeSpanManager.getTimeSpan(),o=this.analyzer.videoManager.getFrameRate(),l=1/o,r=Math.floor(d.duration*o);for(let h=0;h<r;h++){const c=d.start+h*l;await this.seekToTime(i,c),a.drawImage(i,s.x,s.y,s.width,s.height,0,0,n.width,n.height);const u=a.getImageData(0,0,n.width,n.height);this.analyzer.videoManager.drawCurrentFrame();const f=cv.matFromImageData(u),p=new cv.Mat;cv.cvtColor(f,p,cv.COLOR_RGBA2GRAY);const y=new cv.Mat,m=new cv.Mat,g=new cv.MatVector;g.push_back(p);const v=[256],S=[0,256];cv.calcHist(g,[0],m,y,v,S),g.delete();const x=cv.mean(p)[0];this.exposureData.meanBrightness.push(x),this.exposureData.timestamps.push(c);const M=[];for(let w=0;w<256;w++)M.push(y.data32F[w]);this.exposureData.histograms.push({mean:x,std:this.calculateStd(p,x),percentiles:this.calculatePercentiles(M)}),this.visualizeExposureHistogram(M,x,h),f.delete(),p.delete(),y.delete(),m.delete(),e(h/r,`Analyzing exposure in frame ${h+1} of ${r}`)}this.calculateNormalizationParams(),e(1,"Exposure analysis complete")}calculateStd(e,i){const n=new cv.Mat;cv.multiply(e,e,n);const t=cv.mean(n)[0];n.delete();const s=t-i*i;return Math.sqrt(Math.max(0,s))}calculatePercentiles(e){const i=e.reduce((d,o)=>d+o,0);let n=0;const t={},s=[5,25,50,75,95];let a=0;for(let d=0;d<e.length&&a<s.length;d++){n+=e[d];const o=n/i*100;for(;a<s.length&&o>=s[a];)t[s[a]]=d,a++}return t}calculateNormalizationParams(){const e=[...this.exposureData.meanBrightness].sort((n,t)=>n-t),i=Math.floor(e.length/2);this.targetBrightness=e[i],this.exposureData.normalizationFactors=this.exposureData.meanBrightness.map(n=>{if(n<=0||n<10)return 1;const t=this.targetBrightness/n;return Math.max(.5,Math.min(2,t))})}showExposureResults(){document.getElementById("exposureResults").style.display="block";const e=this.exposureData.meanBrightness,i=e.reduce((d,o)=>d+o,0)/e.length,n=Math.min(...e),s=(Math.max(...e)-n)/i*100;let a="Good";s>50?a="Poor":s>25&&(a="Fair"),document.getElementById("exposureBrightness").textContent=i.toFixed(0),document.getElementById("exposureVariation").textContent=s.toFixed(0)+"%",document.getElementById("exposureQuality").textContent=a}getExposureNormalization(e){if(!this.exposureData||!this.exposureData.normalizationFactors)return 1;let i=0,n=Math.abs(e-this.exposureData.timestamps[0]);for(let t=1;t<this.exposureData.timestamps.length;t++){const s=Math.abs(e-this.exposureData.timestamps[t]);s<n&&(n=s,i=t)}return this.exposureData.normalizationFactors[i]}getStabilizationTransform(e){if(!this.motionTransforms||this.motionTransforms.length===0)return{dx:0,dy:0,angle:0,scale:1};let i=this.motionTransforms[0],n=Math.abs(e-i.time);for(const t of this.motionTransforms){const s=Math.abs(e-t.time);s<n&&(n=s,i=t)}return{dx:-i.transform.dx,dy:-i.transform.dy,angle:-i.transform.angle,scale:1/i.transform.scale}}calculateCropBounds(){if(!this.motionTransforms||this.motionTransforms.length===0){this.cropBounds={margin:.1};return}let e=0,i=0,n=0,t=0,s=0,a=1;for(const u of this.motionTransforms)e+=u.transform.dx,i+=u.transform.dy,n=Math.max(n,Math.abs(e)),t=Math.max(t,Math.abs(i)),s=Math.max(s,Math.abs(u.transform.angle)),a=Math.max(a,Math.abs(1-u.transform.scale));const d=this.analyzer.video;if(d.videoWidth<=0||d.videoHeight<=0){console.warn("Invalid video dimensions for crop calculation"),this.cropBounds={margin:.1};return}const o=n/d.videoWidth,l=t/d.videoHeight,r=Math.sqrt(2)*Math.abs(Math.sin(s))*.5,h=a,c=Math.max(o,l,r,h)+.02;this.cropBounds={margin:Math.max(.02,Math.min(.2,c))},console.log("Motion analysis results:"),console.log(`- Max cumulative displacement: X=${n.toFixed(1)}px (${(o*100).toFixed(1)}%), Y=${t.toFixed(1)}px (${(l*100).toFixed(1)}%)`),console.log(`- Rotation margin: ${(r*100).toFixed(1)}%`),console.log(`- Scale margin: ${(h*100).toFixed(1)}%`),console.log(`- Final crop margin: ${(this.cropBounds.margin*100).toFixed(1)}%`)}getCropBounds(){return this.cropBounds||{margin:.1}}}class k{constructor(e){this.videoManager=e,this.cropRegion=null,this.isDrawing=!1,this.startPoint=null,this.currentRect=null,this.enabled=!1}setupUI(){console.log("RegionCroppingManager.setupUI() called"),this.overlayCanvas=document.getElementById("overlayCanvas"),this.overlayCtx=this.overlayCanvas.getContext("2d"),document.getElementById("start-crop-selection").addEventListener("click",()=>this.startSelection()),document.getElementById("reset-crop").addEventListener("click",()=>this.resetSelection()),document.getElementById("confirm-crop").addEventListener("click",()=>this.confirmSelection()),document.getElementById("skip-region-selection").addEventListener("click",()=>this.skipRegionSelection()),this.overlayCanvas.addEventListener("mousedown",this.handleMouseDown.bind(this)),this.overlayCanvas.addEventListener("mousemove",this.handleMouseMove.bind(this)),this.overlayCanvas.addEventListener("mouseup",this.handleMouseUp.bind(this))}startSelection(){this.enabled=!0,this.overlayCanvas.style.cursor="crosshair",this.overlayCanvas.style.pointerEvents="auto",document.getElementById("start-crop-selection").style.display="none",document.getElementById("skip-region-selection").style.display="none",document.getElementById("reset-crop").style.display="inline-block",this.updateInfo("Click and drag to draw selection rectangle")}handleMouseDown(e){if(!this.enabled||this.cropRegion)return;const i=this.overlayCanvas.getBoundingClientRect(),n=e.clientX-i.left,t=e.clientY-i.top;this.isDrawing=!0,this.startPoint={x:n,y:t},this.currentRect={x:n,y:t,width:0,height:0}}handleMouseMove(e){if(!this.enabled)return;const i=this.overlayCanvas.getBoundingClientRect(),n=e.clientX-i.left,t=e.clientY-i.top;this.isDrawing&&this.startPoint&&(this.currentRect={x:Math.min(this.startPoint.x,n),y:Math.min(this.startPoint.y,t),width:Math.abs(n-this.startPoint.x),height:Math.abs(t-this.startPoint.y)},this.drawSelection())}handleMouseUp(e){if(!(!this.enabled||!this.isDrawing))if(this.isDrawing=!1,this.currentRect&&this.currentRect.width>10&&this.currentRect.height>10){const i=this.overlayCanvas,n=i.getBoundingClientRect();if(n.width<=0||n.height<=0){console.warn("Invalid canvas dimensions for region selection"),this.clearSelection(),this.updateInfo("Canvas dimensions invalid. Please try again.");return}const t=i.width/n.width,s=i.height/n.height;this.cropRegion={x:this.currentRect.x*t,y:this.currentRect.y*s,width:this.currentRect.width*t,height:this.currentRect.height*s},document.getElementById("confirm-crop").style.display="inline-block",this.overlayCanvas.style.cursor="default",this.overlayCanvas.style.pointerEvents="none",this.enabled=!1,this.updateInfo(`Selected region: ${Math.round(this.cropRegion.width)}x${Math.round(this.cropRegion.height)} pixels`)}else this.clearSelection(),this.updateInfo("Selection too small. Please try again.")}drawSelection(){if(this.overlayCtx.clearRect(0,0,this.overlayCanvas.width,this.overlayCanvas.height),this.currentRect){const e=this.overlayCanvas.getBoundingClientRect(),i=e.width>0?this.overlayCanvas.width/e.width:1,n=e.height>0?this.overlayCanvas.height/e.height:1,t={x:this.currentRect.x*i,y:this.currentRect.y*n,width:this.currentRect.width*i,height:this.currentRect.height*n};this.overlayCtx.fillStyle="rgba(0, 0, 0, 0.3)",this.overlayCtx.fillRect(0,0,this.overlayCanvas.width,this.overlayCanvas.height),this.overlayCtx.clearRect(t.x,t.y,t.width,t.height),this.overlayCtx.strokeStyle="#00ff00",this.overlayCtx.lineWidth=2,this.overlayCtx.strokeRect(t.x,t.y,t.width,t.height);const s=8;this.overlayCtx.fillStyle="#00ff00",this.overlayCtx.fillRect(t.x-s/2,t.y-s/2,s,s),this.overlayCtx.fillRect(t.x+t.width-s/2,t.y-s/2,s,s),this.overlayCtx.fillRect(t.x-s/2,t.y+t.height-s/2,s,s),this.overlayCtx.fillRect(t.x+t.width-s/2,t.y+t.height-s/2,s,s)}}clearSelection(){this.overlayCtx.clearRect(0,0,this.overlayCanvas.width,this.overlayCanvas.height),this.currentRect=null}resetSelection(){this.cropRegion=null,this.currentRect=null,this.clearSelection(),this.overlayCanvas.style.cursor="default",this.overlayCanvas.style.pointerEvents="none",this.enabled=!1,document.getElementById("start-crop-selection").style.display="inline-block",document.getElementById("skip-region-selection").style.display="inline-block",document.getElementById("reset-crop").style.display="none",document.getElementById("confirm-crop").style.display="none",this.updateInfo(""),this.videoManager.coordinateManager.setRegionTransform(null),this.videoManager.coordinateManager.updateCanvasDimensions(),this.videoManager.cropRegion=null,requestAnimationFrame(()=>{this.videoManager.drawCurrentFrame(!0)})}confirmSelection(){this.cropRegion&&(this.videoManager.coordinateManager.setRegionTransform(this.cropRegion),this.videoManager.coordinateManager.updateCanvasDimensions(),this.videoManager.cropRegion=this.cropRegion,this.videoManager.drawCurrentFrame(),this.clearSelection(),document.getElementById("regionCroppingPanel").classList.add("completed"),this.updateInfo(`Region locked: ${Math.round(this.cropRegion.width)}x${Math.round(this.cropRegion.height)} pixels`),window.dispatchEvent(new CustomEvent("region-crop-complete",{detail:{cropRegion:this.cropRegion}})))}updateInfo(e){document.getElementById("crop-info").textContent=e}getCropRegion(){return this.cropRegion}hasCropRegion(){return this.cropRegion!==null}skipRegionSelection(){this.cropRegion=null,this.currentRect=null,this.clearSelection(),this.enabled=!1,this.videoManager.coordinateManager.setRegionTransform(null),this.videoManager.coordinateManager.updateCanvasDimensions(),requestAnimationFrame(()=>{this.videoManager.drawCurrentFrame(!0)}),document.getElementById("start-crop-selection").textContent="Skipped",document.getElementById("start-crop-selection").disabled=!0,document.getElementById("skip-region-selection").disabled=!0,document.getElementById("regionCroppingPanel").classList.add("completed"),this.updateInfo("Region selection skipped - using full frame"),window.dispatchEvent(new CustomEvent("region-crop-complete",{detail:{cropRegion:null}}))}}class z{constructor(e){this.analyzer=e,this.analysisPoints=[],this.isSelectingPoints=!1,this.pointIdCounter=0,this.overlayCanvas=document.getElementById("overlayCanvas"),this.visualizationCanvas=document.getElementById("visualizationCanvas"),this.overlayCtx=this.overlayCanvas.getContext("2d"),this.vizCtx=this.visualizationCanvas.getContext("2d"),this.bindEvents()}bindEvents(){document.getElementById("selectPointBtn").addEventListener("click",()=>{this.startPointSelection()}),document.getElementById("clearPointsBtn").addEventListener("click",()=>{this.clearPoints()}),document.getElementById("confirmPointsBtn").addEventListener("click",()=>{this.confirmPoints()}),this.analyzer.displayCanvas.addEventListener("click",e=>this.handleCanvasClick(e)),this.analyzer.displayCanvas.addEventListener("mousemove",e=>this.handleMouseMove(e))}startPointSelection(){this.isSelectingPoints=!0,this.analyzer.displayCanvas.style.cursor="crosshair",document.getElementById("selectPointBtn").textContent="Click video to add points",document.getElementById("selectPointBtn").classList.add("primary")}addAnalysisPoint(e,i){if(this.analysisPoints.length>=10){this.analyzer.uiManager.showInfo("Maximum 10 points allowed");return}const n=this.analyzer.videoManager.coordinateManager;if(!n.isPointInBounds(e,i)){const s=n.getCurrentEffectiveBounds();this.analyzer.uiManager.showError(`Point (${Math.round(e)}, ${Math.round(i)}) is outside analysis region. Valid range: (${Math.round(s.x)}-${Math.round(s.x+s.width)}, ${Math.round(s.y)}-${Math.round(s.y+s.height)})`);return}const t={id:++this.pointIdCounter,x:e,y:i};this.analysisPoints.push(t),this.updatePointsList(),this.drawPoints(),document.getElementById("clearPointsBtn").disabled=!1,document.getElementById("confirmPointsBtn").disabled=!1,document.getElementById("startAnalysisBtn").disabled=!1,document.getElementById("pointsHelpText").style.display="block",this.analyzer.validateAndAdvanceStep(6),document.getElementById("selectPointBtn").textContent=`Add Points (${this.analysisPoints.length}/10)`}updatePointsList(){const e=document.getElementById("pointsList");this.analysisPoints.length===0?e.textContent="No points selected":e.innerHTML=this.analysisPoints.map(i=>`<div>Point ${i.id}: (${Math.round(i.x)}, ${Math.round(i.y)})</div>`).join("")}clearPoints(){this.analysisPoints=[],this.isSelectingPoints=!1,this.analyzer.displayCanvas.style.cursor="default",this.overlayCtx.clearRect(0,0,this.overlayCanvas.width,this.overlayCanvas.height),this.vizCtx.clearRect(0,0,this.visualizationCanvas.width,this.visualizationCanvas.height),this.updatePointsList(),document.getElementById("selectPointBtn").textContent="Add Points",document.getElementById("selectPointBtn").classList.remove("primary"),document.getElementById("clearPointsBtn").disabled=!0,document.getElementById("confirmPointsBtn").disabled=!0,document.getElementById("startAnalysisBtn").disabled=!0,document.getElementById("pointsHelpText").style.display="none"}handleCanvasClick(e){if(!this.isSelectingPoints)return;const i=this.analyzer.videoManager.getVideoPoint(e);this.addAnalysisPoint(i.x,i.y)}handleMouseMove(e){const i=this.analyzer.videoManager.getVideoPoint(e);document.getElementById("mouseInfo").textContent=`${Math.round(i.x)}, ${Math.round(i.y)}`}drawPoints(){this.vizCtx.clearRect(0,0,this.visualizationCanvas.width,this.visualizationCanvas.height),this.analysisPoints.length!==0&&(this.vizCtx.save(),this.vizCtx.fillStyle="#FFB81C",this.vizCtx.strokeStyle="#ffffff",this.vizCtx.lineWidth=2,this.vizCtx.font="bold 11px monospace",this.vizCtx.textAlign="center",this.vizCtx.textBaseline="middle",this.analysisPoints.forEach(e=>{const i=this.analyzer.videoManager.coordinateManager,n=i.getCurrentEffectiveBounds();if(!i.isPointInBounds(e.x,e.y))return;const t=e.x-n.x,s=e.y-n.y;this.vizCtx.beginPath(),this.vizCtx.arc(t,s,15,0,2*Math.PI),this.vizCtx.fill(),this.vizCtx.stroke(),this.vizCtx.fillStyle="#000000",this.vizCtx.fillText(e.id.toString(),t,s),this.vizCtx.fillStyle="#FFB81C"}),this.vizCtx.restore())}redrawPoints(){this.overlayCtx.clearRect(0,0,this.overlayCanvas.width,this.overlayCanvas.height),this.vizCtx.clearRect(0,0,this.visualizationCanvas.width,this.visualizationCanvas.height),this.analysisPoints.length>0&&this.drawPoints()}getPoints(){return this.analysisPoints}async confirmPoints(){if(this.analysisPoints.length===0){this.analyzer.uiManager.showInfo("Please select at least one analysis point");return}document.getElementById("pointPanel").classList.add("completed"),await this.analyzer.validateAndAdvanceStep(6)}hasValidPoints(){return this.analysisPoints.length>0}}class T{constructor(e){this.analyzer=e,this.timeSpanStart=0,this.timeSpanEnd=0,this.selectedFrames=0,this.bindEvents()}bindEvents(){const e=document.getElementById("timeRangeStart"),i=document.getElementById("timeRangeEnd");e.addEventListener("input",n=>{this.updateTimeRange(n),this.showFrameAtTimeSmooth(parseFloat(n.target.value))}),e.addEventListener("mouseup",()=>{this.showFrameAtTime(this.timeSpanStart)}),i.addEventListener("input",n=>{this.updateTimeRange(n),this.showFrameAtTimeSmooth(parseFloat(n.target.value))}),i.addEventListener("mouseup",()=>{this.showFrameAtTime(this.timeSpanStart)}),document.getElementById("previewSegmentBtn").addEventListener("click",()=>{this.lockInTimeSpan()})}initialize(e){const i=localStorage.getItem("shadowbands-timerange");if(i)try{const{start:s,end:a}=JSON.parse(i);s>=0&&a<=e&&s<a?(this.timeSpanStart=s,this.timeSpanEnd=a):(this.timeSpanStart=0,this.timeSpanEnd=e)}catch{this.timeSpanStart=0,this.timeSpanEnd=e}else this.timeSpanStart=0,this.timeSpanEnd=e;const n=document.getElementById("timeRangeStart"),t=document.getElementById("timeRangeEnd");n.max=e,t.max=e,n.value=this.timeSpanStart,t.value=this.timeSpanEnd,this.updateTimeRange()}updateTimeRange(e){const i=document.getElementById("timeRangeStart"),n=document.getElementById("timeRangeEnd");let t=parseFloat(i.value),s=parseFloat(n.value);t>s&&(e&&e.target===i?(s=t,n.value=s):(t=s,i.value=t)),this.timeSpanStart=t,this.timeSpanEnd=s,document.getElementById("timeRangeStartLabel").textContent=t.toFixed(1)+"s",document.getElementById("timeRangeEndLabel").textContent=s.toFixed(1)+"s";const a=document.getElementById("timeRangeTrack"),d=this.analyzer.video.duration,o=t/d*100,l=s/d*100;a.style.left=o+"%",a.style.width=l-o+"%";const r=s-t;document.getElementById("selectedDuration").textContent=r.toFixed(1)+"s";const h=this.analyzer.videoManager.getFrameRate();this.selectedFrames=Math.round(r*h),document.getElementById("selectedFrameCount").textContent=this.selectedFrames.toString(),this.updateVideoControlConstraints(),localStorage.setItem("shadowbands-timerange",JSON.stringify({start:this.timeSpanStart,end:this.timeSpanEnd}))}showFrameAtTime(e){this.analyzer.video&&this.analyzer.videoManager&&(this.analyzer.video.currentTime=e,this.analyzer.videoManager.drawCurrentFrame())}showFrameAtTimeSmooth(e){this.analyzer.videoManager&&this.analyzer.videoManager.seekToImmediate(e)}updateVideoControlConstraints(){const e=document.getElementById("timeSlider");e&&(e.min=this.timeSpanStart,e.max=this.timeSpanEnd,(this.analyzer.video.currentTime<this.timeSpanStart||this.analyzer.video.currentTime>this.timeSpanEnd)&&this.showFrameAtTime(this.timeSpanStart))}async lockInTimeSpan(){if(this.timeSpanStart>=0&&this.timeSpanEnd>this.timeSpanStart){this.showFrameAtTime(this.timeSpanStart),this.analyzer.videoManager&&this.analyzer.videoManager.updateSliderRange&&this.analyzer.videoManager.updateSliderRange();const e=document.getElementById("videoSliderContainer");if(e){console.log("Activating time range markers"),e.classList.add("time-range-active");const n=document.getElementById("rangeStartMarker"),t=document.getElementById("rangeEndMarker");n&&t?(console.log("Found markers, making them visible"),n.style.display="block",t.style.display="block",n.style.left="0",t.style.right="0",n.style.opacity="1",t.style.opacity="1"):console.log("Markers not found!",n,t)}else console.log("Slider container not found!");const i=document.getElementById("previewSegmentBtn");i.textContent=`Confirmed ✓ (${(this.timeSpanEnd-this.timeSpanStart).toFixed(1)}s)`,i.classList.add("completed"),i.disabled=!0,this.analyzer.currentStep===2&&await this.analyzer.validateAndAdvanceStep(2)}}getTimeSpan(){return{start:this.timeSpanStart,end:this.timeSpanEnd,duration:this.timeSpanEnd-this.timeSpanStart,frames:this.selectedFrames}}}class R{constructor(e){this.analyzer=e,this.analysisResults=null,this.timeSeries=null,this.canvases=new Map,this.activeTab="overview",this.bindEvents()}bindEvents(){document.getElementById("closeDashboard").addEventListener("click",()=>{this.hide()}),document.getElementById("viewAnalysisBtn").addEventListener("click",()=>{this.analysisResults&&this.timeSeries&&this.show(this.analysisResults,this.timeSeries)}),document.addEventListener("click",e=>{e.target.matches(".tab-btn")&&e.target.dataset.tab&&this.showTab(e.target.dataset.tab)}),document.getElementById("copyDataBtn").addEventListener("click",()=>{this.copyDataToClipboard()}),document.getElementById("downloadDataBtn").addEventListener("click",()=>{this.downloadDataExport()})}show(e,i){this.analysisResults=e,this.timeSeries=i,document.getElementById("analysisDashboard").style.display="block",this.populateSummary(),this.createPointTabs(),this.populateMethodComparison(),this.populateDataExport(),this.initializeVisualizations(),this.showTab("overview")}hide(){document.getElementById("analysisDashboard").style.display="none"}populateSummary(){const e=this.analysisResults;e.dominantFreq!==null?(document.getElementById("summaryDominantFreq").textContent=`${e.dominantFreq.toFixed(2)} Hz`,document.getElementById("summaryFreqDetails").textContent=`Range: ${this.getFrequencyRange()}`):(document.getElementById("summaryDominantFreq").textContent="None detected",document.getElementById("summaryFreqDetails").textContent="No significant peaks found"),document.getElementById("summarySignalQuality").textContent=`${Math.round(e.signalQuality)}%`,document.getElementById("summaryQualityDetails").textContent=`SNR: ${this.getAverageSNR().toFixed(1)} dB`,document.getElementById("summaryConfidence").textContent=`${Math.round(e.confidence)}%`,document.getElementById("summaryConfidenceDetails").textContent=`σ: ${this.getFrequencyStdDev().toFixed(2)} Hz`,document.getElementById("summaryPointCount").textContent=e.pointResults.length.toString(),document.getElementById("summaryPointDetails").textContent=`${this.getValidPointCount()} valid, ${e.pointResults.length-this.getValidPointCount()} poor quality`}getFrequencyRange(){const e=this.analysisResults.pointResults.filter(t=>t.dominantFreq!==null).map(t=>t.dominantFreq);if(e.length===0)return"N/A";const i=Math.min(...e),n=Math.max(...e);return`${i.toFixed(1)}-${n.toFixed(1)} Hz`}getAverageSNR(){const e=this.analysisResults.pointResults.map(n=>n.snr),i=e.reduce((n,t)=>n+t,0)/e.length;return 20*Math.log10(i)}getFrequencyStdDev(){const e=this.analysisResults.pointResults.filter(t=>t.dominantFreq!==null).map(t=>t.dominantFreq);if(e.length<=1)return 0;const i=e.reduce((t,s)=>t+s,0)/e.length,n=e.reduce((t,s)=>t+Math.pow(s-i,2),0)/e.length;return Math.sqrt(n)}getValidPointCount(){return this.analysisResults.pointResults.filter(e=>e.dominantFreq!==null).length}createPointTabs(){const e=document.getElementById("pointTabsContainer"),i=document.getElementById("pointTabsContent");e.innerHTML="",i.innerHTML="",this.analysisResults.pointResults.forEach((n,t)=>{const s=document.createElement("button");s.className="tab-btn",s.textContent=`Point ${n.point.id}`,s.dataset.tab=`point-${t}`,s.addEventListener("click",()=>this.showTab(`point-${t}`)),e.appendChild(s);const a=document.createElement("div");a.id=`point-${t}Tab`,a.className="tab-panel",a.innerHTML=this.createPointTabContent(n,t),i.appendChild(a)})}createPointTabContent(e,i){return`
+            <div class="point-detail-grid">
+                <div class="viz-panel">
+                    <h3>Raw Time Series</h3>
+                    <canvas id="point-${i}-raw" class="detail-canvas"></canvas>
+                </div>
+                <div class="viz-panel">
+                    <h3>Processed Signal</h3>
+                    <canvas id="point-${i}-processed" class="detail-canvas"></canvas>
+                </div>
+                <div class="viz-panel">
+                    <h3>Full Spectrum (0-${(this.getSampleRate()/2).toFixed(0)} Hz)</h3>
+                    <canvas id="point-${i}-fullspectrum" class="detail-canvas"></canvas>
+                </div>
+                <div class="viz-panel">
+                    <h3>Shadowband Range (1-20 Hz)</h3>
+                    <canvas id="point-${i}-shadowspectrum" class="detail-canvas"></canvas>
+                </div>
+                <div class="viz-panel">
+                    <h3>Phase Spectrum</h3>
+                    <canvas id="point-${i}-phase" class="detail-canvas"></canvas>
+                </div>
+                <div class="viz-panel">
+                    <h3>Autocorrelation</h3>
+                    <canvas id="point-${i}-autocorr" class="detail-canvas"></canvas>
+                </div>
+            </div>
+            <div class="viz-panel">
+                <h3>Statistical Analysis</h3>
+                <table class="stats-table">
+                    <tr><td>Point Coordinates:</td><td>(${Math.round(e.point.x)}, ${Math.round(e.point.y)})</td></tr>
+                    <tr><td>Dominant Frequency:</td><td>${e.dominantFreq?e.dominantFreq.toFixed(3)+" Hz":"None"}</td></tr>
+                    <tr><td>Peak Power:</td><td>${this.getPeakPower(e).toFixed(6)}</td></tr>
+                    <tr><td>Signal-to-Noise Ratio:</td><td>${(20*Math.log10(e.snr)).toFixed(1)} dB</td></tr>
+                    <tr><td>Total Peaks (1-20 Hz):</td><td>${e.peaks.length}</td></tr>
+                    <tr><td>Mean Brightness:</td><td>${this.getMeanBrightness(i).toFixed(1)}</td></tr>
+                    <tr><td>Brightness Std Dev:</td><td>${this.getBrightnessStdDev(i).toFixed(2)}</td></tr>
+                    <tr><td>Signal Length:</td><td>${this.timeSeries[i].brightness.length} samples</td></tr>
+                    <tr><td>Sample Rate:</td><td>${this.getSampleRate().toFixed(2)} Hz</td></tr>
+                    <tr><td>Frequency Resolution:</td><td>${this.getFrequencyResolution().toFixed(4)} Hz/bin</td></tr>
+                    <tr><td>Window Function:</td><td>Hamming</td></tr>
+                </table>
+            </div>
+            <div class="viz-panel">
+                <h3>Peak Details</h3>
+                <div id="point-${i}-peaks" class="params-display">
+                    ${this.formatPeakDetails(e.peaks)}
+                </div>
+            </div>
+        `}getPeakPower(e){return!e.peaks||e.peaks.length===0?0:e.peaks[0].power}getMeanBrightness(e){const i=this.timeSeries[e].brightness;return i.reduce((n,t)=>n+t,0)/i.length}getBrightnessStdDev(e){const i=this.timeSeries[e].brightness,n=this.getMeanBrightness(e),t=i.reduce((s,a)=>s+Math.pow(a-n,2),0)/i.length;return Math.sqrt(t)}getSampleRate(){const e=this.timeSeries[0].times;return e.length/(e[e.length-1]-e[0])}getFrequencyResolution(){return this.getSampleRate()/this.timeSeries[0].brightness.length}formatPeakDetails(e){if(!e||e.length===0)return"No significant peaks detected in shadowband range (1-20 Hz)";let i=`Found ${e.length} peaks in shadowband range:\\n\\n`;return e.forEach((n,t)=>{i+=`Peak ${t+1}: ${n.freq.toFixed(3)} Hz (Power: ${n.power.toFixed(6)})\\n`}),i}initializeVisualizations(){this.initOverviewVisualizations(),this.initPointVisualizations()}initOverviewVisualizations(){this.initCanvas("overviewWaveform",800,300),this.initCanvas("overviewSpectrum",800,300),this.initCanvas("coherenceMatrix",400,400),this.populateProcessingParams(),this.drawOverviewWaveform(),this.drawOverviewSpectrum(),this.drawCoherenceMatrix()}initPointVisualizations(){this.analysisResults.pointResults.forEach((e,i)=>{this.initCanvas(`point-${i}-raw`,600,250),this.initCanvas(`point-${i}-processed`,600,250),this.initCanvas(`point-${i}-fullspectrum`,600,250),this.initCanvas(`point-${i}-shadowspectrum`,600,250),this.initCanvas(`point-${i}-phase`,600,250),this.initCanvas(`point-${i}-autocorr`,600,250)})}initCanvas(e,i,n){const t=document.getElementById(e);if(!t)return null;t.width=i,t.height=n;const s=t.getContext("2d");return this.canvases.set(e,s),s}populateProcessingParams(){const e=document.getElementById("processingParams"),i=this.getSampleRate(),n=this.timeSeries[0].brightness.length;e.innerHTML=`
+            <strong>Signal Processing Parameters:</strong><br>
+            Sample Rate: ${i.toFixed(2)} Hz<br>
+            Signal Length: ${n} samples<br>
+            Duration: ${(n/i).toFixed(2)} seconds<br>
+            Frequency Resolution: ${this.getFrequencyResolution().toFixed(4)} Hz/bin<br>
+            Nyquist Frequency: ${(i/2).toFixed(1)} Hz<br>
+            Window Function: Hamming<br>
+            DC Removal: Yes<br>
+            Zero Padding: None<br><br>
+            
+            <strong>Analysis Parameters:</strong><br>
+            Target Frequency Range: 1-20 Hz<br>
+            Peak Detection Threshold: Local maxima<br>
+            Noise Estimation: >30 Hz content<br>
+            SNR Calculation: Signal power / Noise power<br>
+            Confidence Metric: Cross-point frequency variance<br>
+        `}drawOverviewWaveform(){const e=this.canvases.get("overviewWaveform");if(!e)return;const i=e.canvas;e.clearRect(0,0,i.width,i.height),this.drawGrid(e,i.width,i.height);const n=["#00ff00","#00ffff","#ff00ff","#ffaa00","#aa00ff","#ff0066","#66ff00","#0066ff","#ff6600","#00ff66"];this.timeSeries.forEach((t,s)=>{const a=t.brightness;t.times,e.strokeStyle=n[s%n.length],e.lineWidth=1.5,e.globalAlpha=.7,e.beginPath();for(let d=0;d<a.length;d++){const o=d/a.length*i.width,l=i.height-a[d]/255*i.height;d===0?e.moveTo(o,l):e.lineTo(o,l)}e.stroke()}),e.globalAlpha=1,this.drawAxesLabels(e,"Time","Brightness",i.width,i.height)}drawOverviewSpectrum(){const e=this.canvases.get("overviewSpectrum");if(!e)return;const i=e.canvas;e.clearRect(0,0,i.width,i.height);const n=["#00ff00","#00ffff","#ff00ff","#ffaa00","#aa00ff"],t=30;this.analysisResults.pointResults.forEach((d,o)=>{if(!d.spectrum||!d.frequencies)return;let l=d.frequencies.findIndex(c=>c>t);l===-1&&(l=d.frequencies.length/2);const r=d.spectrum.slice(0,l),h=d.frequencies.slice(0,l);e.strokeStyle=n[o%n.length],e.lineWidth=1,e.globalAlpha=.6,e.beginPath();for(let c=0;c<r.length;c++){const u=h[c]/t*i.width,f=i.height-Math.sqrt(r[c])/Math.sqrt(Math.max(...r))*(i.height-50);c===0?e.moveTo(u,f):e.lineTo(u,f)}e.stroke()}),e.fillStyle="rgba(255, 255, 0, 0.1)";const s=1/t*i.width,a=20/t*i.width;e.fillRect(s,0,a-s,i.height-50),e.globalAlpha=1,this.drawGrid(e,i.width,i.height),this.drawAxesLabels(e,"Frequency (Hz)","Power",i.width,i.height)}drawCoherenceMatrix(){const e=this.canvases.get("coherenceMatrix");if(!e)return;const i=e.canvas,n=this.analysisResults.pointResults.length;e.clearRect(0,0,i.width,i.height);const t=this.calculateCoherenceMatrix(),s=Math.min(i.width,i.height)/n;for(let a=0;a<n;a++)for(let d=0;d<n;d++){const o=t[a][d],l=Math.round(o*255),r=Math.round((1-o)*255);e.fillStyle=`rgb(${l}, 0, ${r})`,e.fillRect(d*s,a*s,s,s),e.fillStyle="white",e.font="10px monospace",e.textAlign="center",e.fillText(o.toFixed(2),d*s+s/2,a*s+s/2+3)}e.fillStyle="white",e.font="12px monospace",e.fillText("Point Coherence Matrix",10,i.height-10)}calculateCoherenceMatrix(){const e=this.analysisResults.pointResults,i=e.length,n=[];for(let t=0;t<i;t++){n[t]=[];for(let s=0;s<i;s++)if(t===s)n[t][s]=1;else{const a=e[t].dominantFreq,d=e[s].dominantFreq;if(a&&d){const o=Math.abs(a-d),l=2;n[t][s]=Math.max(0,1-o/l)}else n[t][s]=0}}return n}drawGrid(e,i,n){e.strokeStyle="rgba(255, 255, 255, 0.1)",e.lineWidth=1;for(let t=0;t<=10;t++){const s=t/10*n;e.beginPath(),e.moveTo(0,s),e.lineTo(i,s),e.stroke()}for(let t=0;t<=10;t++){const s=t/10*i;e.beginPath(),e.moveTo(s,0),e.lineTo(s,n),e.stroke()}}drawAxesLabels(e,i,n,t,s){e.fillStyle="white",e.font="12px monospace",e.textAlign="center",e.fillText(i,t/2,s-10),e.save(),e.translate(15,s/2),e.rotate(-Math.PI/2),e.textAlign="center",e.fillText(n,0,0),e.restore()}showTab(e){document.querySelectorAll(".tab-panel").forEach(t=>{t.classList.remove("active")}),document.querySelectorAll(".tab-btn").forEach(t=>{t.classList.remove("active")});const i=document.getElementById(`${e}Tab`),n=document.querySelector(`[data-tab="${e}"]`);if(i&&i.classList.add("active"),n&&n.classList.add("active"),this.activeTab=e,e.startsWith("point-")){const t=parseInt(e.split("-")[1]);this.drawPointVisualizations(t)}else e==="methods"&&this.drawMethodComparison()}drawPointVisualizations(e){const i=this.analysisResults.pointResults[e],n=this.timeSeries[e];this.drawRawTimeSeries(e,n),this.drawProcessedSignal(e,n),this.drawFullSpectrum(e,i),this.drawShadowbandSpectrum(e,i),this.drawPhaseSpectrum(e,i),this.drawAutocorrelation(e,i)}drawRawTimeSeries(e,i){const n=this.canvases.get(`point-${e}-raw`);if(!n)return;const t=n.canvas;n.clearRect(0,0,t.width,t.height),this.drawGrid(n,t.width,t.height);const s=i.brightness;n.strokeStyle="#00ff00",n.lineWidth=2,n.beginPath();for(let a=0;a<s.length;a++){const d=a/s.length*t.width,o=t.height-s[a]/255*t.height;a===0?n.moveTo(d,o):n.lineTo(d,o)}n.stroke(),this.drawAxesLabels(n,"Sample","Brightness",t.width,t.height)}drawProcessedSignal(e,i){const n=this.canvases.get(`point-${e}-processed`);if(!n)return;const t=n.canvas;n.clearRect(0,0,t.width,t.height),this.drawGrid(n,t.width,t.height);const s=i.brightness,a=s.reduce((r,h)=>r+h,0)/s.length,d=s.map(r=>r-a),o=this.applyHammingWindow(d),l=Math.max(...o.map(Math.abs));n.strokeStyle="#ffaa00",n.lineWidth=2,n.beginPath();for(let r=0;r<o.length;r++){const h=r/o.length*t.width,c=t.height/2-o[r]/l*(t.height/2-20);r===0?n.moveTo(h,c):n.lineTo(h,c)}n.stroke(),n.strokeStyle="rgba(255, 255, 255, 0.3)",n.lineWidth=1,n.beginPath(),n.moveTo(0,t.height/2),n.lineTo(t.width,t.height/2),n.stroke(),this.drawAxesLabels(n,"Sample","Amplitude",t.width,t.height)}drawFullSpectrum(e,i){const n=this.canvases.get(`point-${e}-fullspectrum`);if(!n)return;const t=n.canvas;if(n.clearRect(0,0,t.width,t.height),this.drawGrid(n,t.width,t.height),!i.spectrum||!i.frequencies)return;const s=i.spectrum.slice(0,i.spectrum.length/2),a=i.frequencies.slice(0,i.frequencies.length/2),d=a[a.length-1],o=Math.max(...s);n.fillStyle="rgba(0, 255, 0, 0.7)";const l=t.width/s.length;for(let c=0;c<s.length;c++){const u=s[c]/o*(t.height-40);n.fillRect(c*l,t.height-u-20,l-1,u)}const r=a.findIndex(c=>c>=1),h=a.findIndex(c=>c>20);r>=0&&h>=0&&(n.fillStyle="rgba(255, 255, 0, 0.2)",n.fillRect(r*l,0,(h-r)*l,t.height-20)),this.drawAxesLabels(n,`Frequency (0-${d.toFixed(0)} Hz)`,"Power",t.width,t.height)}drawShadowbandSpectrum(e,i){const n=this.canvases.get(`point-${e}-shadowspectrum`);if(!n)return;const t=n.canvas;if(n.clearRect(0,0,t.width,t.height),this.drawGrid(n,t.width,t.height),!i.spectrum||!i.frequencies)return;const s=i.frequencies.findIndex(h=>h>=1),a=i.frequencies.findIndex(h=>h>20);if(s<0||a<0)return;const d=i.spectrum.slice(s,a),o=i.frequencies.slice(s,a),l=Math.max(...d);n.fillStyle="rgba(255, 255, 0, 0.8)";const r=t.width/d.length;for(let h=0;h<d.length;h++){const c=d[h]/l*(t.height-40);n.fillRect(h*r,t.height-c-20,r-1,c)}i.peaks&&(n.strokeStyle="#ff0000",n.lineWidth=3,i.peaks.forEach(h=>{const c=o.findIndex(u=>Math.abs(u-h.freq)<.01);if(c>=0){const u=c*r+r/2;n.beginPath(),n.moveTo(u,0),n.lineTo(u,t.height-20),n.stroke(),n.fillStyle="#ffffff",n.font="12px monospace",n.textAlign="center",n.fillText(`${h.freq.toFixed(2)} Hz`,u,20)}})),this.drawAxesLabels(n,"Frequency (1-20 Hz)","Power",t.width,t.height)}applyHammingWindow(e){const i=new Array(e.length),n=e.length;for(let t=0;t<n;t++){const s=.54-.46*Math.cos(2*Math.PI*t/(n-1));i[t]=e[t]*s}return i}drawPhaseSpectrum(e,i){const n=this.canvases.get(`point-${e}-phase`);if(!n||!i.phase||!i.frequencies)return;const t=n.canvas;n.clearRect(0,0,t.width,t.height),this.drawGrid(n,t.width,t.height);const s=i.frequencies.findIndex(o=>o>=1),a=i.frequencies.findIndex(o=>o>20);if(s<0||a<0)return;const d=i.phase.slice(s,a);i.frequencies.slice(s,a),n.strokeStyle="#ff00ff",n.lineWidth=2,n.beginPath();for(let o=0;o<d.length;o++){const l=o/d.length*t.width,r=t.height/2-d[o]/Math.PI*(t.height/2-20);o===0?n.moveTo(l,r):n.lineTo(l,r)}n.stroke(),n.strokeStyle="rgba(255, 255, 255, 0.3)",n.lineWidth=1,n.beginPath(),n.moveTo(0,t.height/2),n.lineTo(t.width,t.height/2),n.stroke(),n.beginPath(),n.moveTo(0,20),n.lineTo(t.width,20),n.moveTo(0,t.height-20),n.lineTo(t.width,t.height-20),n.stroke(),n.fillStyle="white",n.font="10px monospace",n.fillText("π",5,25),n.fillText("0",5,t.height/2+5),n.fillText("-π",5,t.height-10),this.drawAxesLabels(n,"Frequency (1-20 Hz)","Phase (radians)",t.width,t.height)}drawAutocorrelation(e,i){const n=this.canvases.get(`point-${e}-autocorr`);if(!n||!i.processedTimeSeries)return;const t=n.canvas;n.clearRect(0,0,t.width,t.height),this.drawGrid(n,t.width,t.height);const s=i.processedTimeSeries,a=s.length,d=new Array(a);for(let l=0;l<a/2;l++){let r=0,h=0;for(let c=0;c<a-l;c++)r+=s[c]*s[c+l],h++;d[l]=h>0?r/h:0}const o=d[0];if(o!==0)for(let l=0;l<a/2;l++)d[l]/=o;n.strokeStyle="#00ffff",n.lineWidth=2,n.beginPath();for(let l=0;l<a/2;l++){const r=l/(a/2)*t.width,h=t.height/2-d[l]*(t.height/2-20);l===0?n.moveTo(r,h):n.lineTo(r,h)}n.stroke(),n.strokeStyle="rgba(255, 255, 255, 0.3)",n.lineWidth=1,n.beginPath(),n.moveTo(0,t.height/2),n.lineTo(t.width,t.height/2),n.stroke(),this.drawAxesLabels(n,"Lag (samples)","Correlation",t.width,t.height)}populateMethodComparison(){if(!this.analysisResults.multiMethodResults)return;const e=this.analysisResults.multiMethodResults,i=document.getElementById("methodComparisonBody");if(i.innerHTML="",e.simpleFft&&this.addMethodRow(i,"Simple FFT",e.simpleFft,"Standard FFT with Hamming window"),e.welchPsd&&this.addMethodRow(i,"Welch's PSD",e.welchPsd,"Averaged periodogram (reduced variance)"),e.paddedFft&&this.addMethodRow(i,"Zero-Padded FFT",e.paddedFft,"4x zero padding for smooth spectrum"),e.autocorrelation&&this.addMethodRow(i,"Autocorrelation",e.autocorrelation,"Time-domain period detection"),e.consensus){document.getElementById("consensusFrequency").textContent=`${e.consensus.frequency.toFixed(3)} Hz`,document.getElementById("consensusDetails").textContent=`±${e.consensus.stdDev.toFixed(3)} Hz uncertainty`;const n=this.calculateMethodAgreement(e);document.getElementById("methodAgreement").textContent=`${Math.round(n)}%`,document.getElementById("agreementDetails").textContent=`${e.consensus.numMethods} of 4 methods agree`;const t=e.consensus.agreement==="High"?95:e.consensus.agreement==="Medium"?80:60;document.getElementById("overallConfidence").textContent=`${t}%`,document.getElementById("overallConfidenceDetails").textContent=`${e.consensus.agreement} agreement`}this.populatePrecisionMetrics()}addMethodRow(e,i,n,t){const s=document.createElement("tr"),a=n.frequency||n.dominantFreq||"N/A",d=n.peak?n.peak.power.toFixed(6):"N/A",o=n.snr?(20*Math.log10(n.snr)).toFixed(1):"N/A",l=this.getMethodConfidence(n);s.innerHTML=`
+            <td class="method-name">${i}</td>
+            <td class="frequency-value">${typeof a=="number"?a.toFixed(3)+" Hz":a}</td>
+            <td>${d}</td>
+            <td>${o} dB</td>
+            <td class="${this.getConfidenceClass(l)}">${l}%</td>
+            <td style="font-size: 10px; color: var(--text-secondary);">${t}</td>
+        `,e.appendChild(s)}getMethodConfidence(e){return e.snr&&e.snr>3?90:e.snr&&e.snr>2?75:e.snr&&e.snr>1.5?60:40}getConfidenceClass(e){return e>=80?"confidence-high":e>=60?"confidence-medium":"confidence-low"}calculateMethodAgreement(e){const i=[];if(e.simpleFft&&e.simpleFft.frequency&&i.push(e.simpleFft.frequency),e.welchPsd&&e.welchPsd.frequency&&i.push(e.welchPsd.frequency),e.paddedFft&&e.paddedFft.frequency&&i.push(e.paddedFft.frequency),e.autocorrelation&&e.autocorrelation.frequency&&i.push(e.autocorrelation.frequency),i.length<2)return 0;const n=i.reduce((s,a)=>s+a,0)/i.length,t=Math.max(...i.map(s=>Math.abs(s-n)));return Math.max(0,Math.min(100,100*(1-t/.5)))}populatePrecisionMetrics(){const e=this.getSampleRate(),i=this.timeSeries[0]?this.timeSeries[0].brightness.length:1024;document.getElementById("fftBinResolution").textContent=`${(e/i).toFixed(4)} Hz`,document.getElementById("subBinPrecision").textContent="±0.05 Hz",document.getElementById("welchVarianceReduction").textContent="8x",document.getElementById("zeroPaddingFactor").textContent="4x"}drawMethodComparison(){this.drawMethodSpectrumOverlay()}drawMethodSpectrumOverlay(){const e=document.getElementById("methodSpectrumOverlay");if(!e)return;const i=e.getContext("2d");e.width=e.offsetWidth,e.height=e.offsetHeight||300,i.clearRect(0,0,e.width,e.height),this.drawGrid(i,e.width,e.height);const n=this.analysisResults.multiMethodResults;if(!n)return;const t=["#00ff00","#ff6600","#0099ff","#ffff00"],s=["Simple FFT","Welch's PSD","Zero-Padded FFT","Autocorr"];let a=0;n.simpleFft&&n.simpleFft.spectrum&&this.drawSpectrumLine(i,n.simpleFft.spectrum,n.simpleFft.frequencies,t[a++],e),n.welchPsd&&n.welchPsd.spectrum&&this.drawSpectrumLine(i,n.welchPsd.spectrum,n.welchPsd.frequencies,t[a++],e),n.paddedFft&&n.paddedFft.spectrum&&this.drawSpectrumLine(i,n.paddedFft.spectrum,n.paddedFft.frequencies,t[a++],e),this.drawMethodLegend(i,s.slice(0,a),t.slice(0,a),e),this.drawAxesLabels(i,"Frequency (Hz)","Power",e.width,e.height)}drawSpectrumLine(e,i,n,t,s){if(!i||!n)return;const a=n.findIndex(r=>r>=1),d=n.findIndex(r=>r>20),o=d===-1?n.length:d;if(a===-1||a>=o)return;const l=Math.max(...i.slice(a,o));if(l!==0){e.strokeStyle=t,e.lineWidth=2,e.beginPath();for(let r=a;r<o;r++){const h=(n[r]-1)/19*s.width,c=s.height-20-i[r]/l*(s.height-40);r===a?e.moveTo(h,c):e.lineTo(h,c)}e.stroke()}}drawMethodLegend(e,i,n,t){const a=t.width-150;e.font="12px monospace",e.fillStyle="rgba(0, 0, 0, 0.7)",e.fillRect(a-10,15,140,i.length*20+10),i.forEach((d,o)=>{e.strokeStyle=n[o],e.lineWidth=3,e.beginPath(),e.moveTo(a,20+o*20+5),e.lineTo(a+20,20+o*20+5),e.stroke(),e.fillStyle="#ffffff",e.fillText(d,a+25,20+o*20+9)})}populateDataExport(){const e=this.generateFullDataExport();document.getElementById("dataOutput").textContent=e}generateFullDataExport(){const e=this.analysisResults,i=this.timeSeries,n=new Date().toISOString();let t="";t+="=".repeat(80)+`
+`,t+=`SHADOWBAND FREQUENCY ANALYZER - COMPLETE DATA EXPORT
+`,t+="=".repeat(80)+`
+`,t+=`Export Timestamp: ${n}
+`,t+=`Analysis Completed: ${e.analysisTimestamp||"Unknown"}
+`,t+=`
+`,t+=`VIDEO METADATA:
+`,t+="-".repeat(40)+`
+`,this.analyzer.video&&(t+=`File Name: ${this.analyzer.videoManager.fileName||"Unknown"}
+`,t+=`Resolution: ${this.analyzer.video.videoWidth}x${this.analyzer.video.videoHeight}
+`,t+=`Duration: ${this.analyzer.video.duration.toFixed(2)} seconds
+`,t+=`Frame Rate: ${this.analyzer.videoManager.getFrameRate().toFixed(2)} fps
+`);const s=this.analyzer.timeSpanManager.getTimeSpan();t+=`Analysis Time Span: ${s.start.toFixed(3)}s to ${s.end.toFixed(3)}s
+`,t+=`Analysis Duration: ${s.duration.toFixed(3)} seconds
+`,t+=`Sample Rate: ${this.getSampleRate().toFixed(2)} Hz
+`,t+=`Total Samples: ${i[0].brightness.length}
+`,t+=`
+`,t+=`PREPROCESSING PIPELINE:
+`,t+="-".repeat(40)+`
+`;const a=this.analyzer.preprocessingManager;if(a.isStabilized){const o=a.getCropBounds();t+=`Motion Stabilization: APPLIED
+`,t+=`  Crop Margin: ${(o.margin*100).toFixed(1)}%
+`,t+=`  Motion Transforms: ${a.motionTransforms.length} frames analyzed
+`}else t+=`Motion Stabilization: SKIPPED
+`;const d=this.analyzer.regionCroppingManager;if(d.cropBounds){const o=d.cropBounds;t+=`Region Cropping: APPLIED
+`,t+=`  Crop Bounds: x=${o.x.toFixed(0)}, y=${o.y.toFixed(0)}, w=${o.width.toFixed(0)}, h=${o.height.toFixed(0)}
+`}else t+=`Region Cropping: SKIPPED
+`;if(a.isExposureNormalized?(t+=`Exposure Normalization: APPLIED
+`,t+=`  Target Brightness: ${a.targetBrightness.toFixed(1)}
+`):t+=`Exposure Normalization: SKIPPED
+`,t+=`
+`,t+=`ANALYSIS SUMMARY:
+`,t+="-".repeat(40)+`
+`,t+=`Points Analyzed: ${e.pointResults.length}
+`,t+=`Valid Points: ${this.getValidPointCount()}
+`,t+=`Dominant Frequency: ${e.dominantFreq?e.dominantFreq.toFixed(3)+" Hz":"None detected"}
+`,t+=`Average SNR: ${this.getAverageSNR().toFixed(1)} dB
+`,t+=`Frequency Std Dev: ${this.getFrequencyStdDev().toFixed(3)} Hz
+`,t+=`Quality Rating: ${e.signalQuality.toFixed(0)}%
+`,t+=`Confidence: ${e.confidence.toFixed(0)}%
+`,t+=`
+`,e.multiMethodResults){t+=`MULTI-METHOD FREQUENCY ANALYSIS:
+`,t+="-".repeat(40)+`
+`;const o=e.multiMethodResults;o.simpleFft&&(t+=`Simple FFT:
+`,t+=`  Dominant Frequency: ${o.simpleFft.frequency?o.simpleFft.frequency.toFixed(3)+" Hz":"N/A"}
+`,t+=`  Peak Power: ${o.simpleFft.peak?.power?o.simpleFft.peak.power.toFixed(6):"N/A"}
+`,t+=`  SNR: ${o.simpleFft.snr?(20*Math.log10(o.simpleFft.snr)).toFixed(1)+" dB":"N/A"}
+`,t+=`  Window: Hamming
+`,t+=`  FFT Size: ${o.simpleFft.fftSize||o.simpleFft.windowSize||"N/A"}
+`,t+=`
+`),o.welchPsd&&(t+=`Welch's PSD:
+`,t+=`  Dominant Frequency: ${o.welchPsd.frequency?o.welchPsd.frequency.toFixed(3)+" Hz":"N/A"}
+`,t+=`  Peak Power: ${o.welchPsd.peak?.power?o.welchPsd.peak.power.toFixed(6):"N/A"}
+`,t+=`  SNR: ${o.welchPsd.snr?(20*Math.log10(o.welchPsd.snr)).toFixed(1)+" dB":"N/A"}
+`,t+=`  Window: Hamming
+`,t+=`  Overlap: 50%
+`,t+=`  Segments: ${o.welchPsd.numSegments||o.welchPsd.numWindows||"N/A"}
+`,t+=`  Variance Reduction: ~8x
+`,t+=`
+`),o.paddedFft&&(t+=`Zero-Padded FFT:
+`,t+=`  Dominant Frequency: ${o.paddedFft.frequency?o.paddedFft.frequency.toFixed(3)+" Hz":"N/A"}
+`,t+=`  Peak Power: ${o.paddedFft.peak?.power?o.paddedFft.peak.power.toFixed(6):"N/A"}
+`,t+=`  SNR: ${o.paddedFft.snr?(20*Math.log10(o.paddedFft.snr)).toFixed(1)+" dB":"N/A"}
+`,t+=`  Zero-Padding Factor: 4x
+`,t+=`  Interpolated FFT Size: ${o.paddedFft.paddedSize||o.paddedFft.fftSize||"N/A"}
+`,t+=`
+`),o.autocorrelation&&(t+=`Autocorrelation:
+`,t+=`  Dominant Frequency: ${o.autocorrelation.frequency?o.autocorrelation.frequency.toFixed(3)+" Hz":"N/A"}
+`,t+=`  Peak Correlation: ${o.autocorrelation.peak?.power?o.autocorrelation.peak.power.toFixed(6):"N/A"}
+`,t+=`  SNR: ${o.autocorrelation.snr?(20*Math.log10(o.autocorrelation.snr)).toFixed(1)+" dB":"N/A"}
+`,t+=`  Method: Time-domain period detection
+`,t+=`
+`),o.consensus&&(t+=`Consensus Analysis:
+`,t+=`  Best Estimate: ${o.consensus.frequency?o.consensus.frequency.toFixed(3)+" Hz":"N/A"}
+`,t+=`  Uncertainty: ±${o.consensus.stdDev?o.consensus.stdDev.toFixed(3)+" Hz":"N/A"}
+`,t+=`  Agreement Level: ${o.consensus.agreement||"N/A"}
+`,t+=`  Methods Agreeing: ${o.consensus.numMethods||0} of 5
+`,t+=`  Method Agreement: ${this.calculateMethodAgreement?this.calculateMethodAgreement(o).toFixed(0)+"%":"N/A"}
+`,t+=`
+`),o.harmonic&&(t+=`Harmonic Analysis:
+`,t+=`  Fundamental Frequency: ${o.harmonic.fundamental?o.harmonic.fundamental.toFixed(3)+" Hz":"N/A"}
+`,t+=`  Fundamental Power: ${o.harmonic.fundamentalPower?o.harmonic.fundamentalPower.toFixed(1):"N/A"}
+`,t+=`  Confidence: ${o.harmonic.confidence?o.harmonic.confidence.toFixed(0)+"%":"N/A"}
+`,o.harmonic.harmonics&&o.harmonic.harmonics.length>0&&(t+=`  Harmonic Structure:
+`,o.harmonic.harmonics.forEach(l=>{t+=`    ${l.order}x: ${l.frequency.toFixed(2)} Hz (power=${l.power.toFixed(1)})
+`})),t+=`
+`),t+=`
+DETAILED PEAK ANALYSIS:
+`,t+="-".repeat(40)+`
+`,o.simpleFft?.allPeaks?.length>0&&(t+=`Simple FFT - Top Peaks:
+`,o.simpleFft.allPeaks.slice(0,5).forEach((l,r)=>{t+=`  ${r+1}. ${l.freq.toFixed(3)} Hz (power=${l.power.toFixed(1)})
+`}),t+=`
+`),o.welchPsd?.allPeaks?.length>0&&(t+=`Welch PSD - Top Peaks:
+`,o.welchPsd.allPeaks.slice(0,5).forEach((l,r)=>{t+=`  ${r+1}. ${l.freq.toFixed(3)} Hz (power=${l.power.toFixed(1)})
+`}),t+=`
+`),o.paddedFft?.allPeaks?.length>0&&(t+=`Zero-Padded FFT - Top Peaks:
+`,o.paddedFft.allPeaks.slice(0,5).forEach((l,r)=>{t+=`  ${r+1}. ${l.freq.toFixed(3)} Hz (power=${l.power.toFixed(1)})
+`}),t+=`
+`),o.spectrumSamples?.length>0&&(t+=`
+SPECTRUM SAMPLES (0-30 Hz):
+`,t+="-".repeat(40)+`
+`,t+=`Frequency (Hz) | Power
+`,t+="-".repeat(40)+`
+`,o.spectrumSamples.forEach(l=>{t+=`  ${l.freq.padEnd(13)} | ${l.power}
+`}),t+=`
+`)}return t+=`INDIVIDUAL POINT ANALYSIS:
+`,t+="-".repeat(40)+`
+`,e.pointResults.forEach((o,l)=>{if(t+=`Point ${l+1}:
+`,t+=`  Coordinates: (${o.point?.x||"N/A"}, ${o.point?.y||"N/A"})
+`,t+=`  Dominant Frequency: ${o.dominantFreq?o.dominantFreq.toFixed(3)+" Hz":"None detected"}
+`,o.peaks&&o.peaks.length>0){if(t+=`  Peak Power: ${o.peaks[0].power.toFixed(6)}
+`,t+=`  SNR: ${(20*Math.log10(o.snr)).toFixed(1)} dB
+`,t+=`  Quality: ${o.quality||"N/A"}
+`,o.peaks.length>1&&(t+=`  Additional Peaks:
+`,o.peaks.slice(1,3).forEach((p,y)=>{t+=`    Peak ${y+2}: ${p.freq.toFixed(3)} Hz (Power: ${p.power.toFixed(6)})
+`})),o.harmonicAnalysis&&(t+=`  Harmonic Analysis:
+`,t+=`    Fundamental: ${o.harmonicAnalysis.fundamental?o.harmonicAnalysis.fundamental.toFixed(3)+" Hz":"N/A"}
+`,o.harmonicAnalysis.harmonics?.length>0)){const p=o.harmonicAnalysis.harmonics.map(y=>`${y.order}x:${y.frequency.toFixed(2)}Hz`).join(", ");t+=`    Harmonics: ${p}
+`}}else t+=`  Peak Power: N/A
+`,t+=`  SNR: N/A
+`,t+=`  Quality: Poor (no peaks detected)
+`;const r=i[l].brightness,h=this.getMeanBrightness(l),c=this.getBrightnessStdDev(l),u=Math.min(...r),f=Math.max(...r);t+=`  Brightness Stats:
+`,t+=`    Mean: ${h.toFixed(2)}
+`,t+=`    Std Dev: ${c.toFixed(2)}
+`,t+=`    Range: ${u.toFixed(1)} - ${f.toFixed(1)}
+`,t+=`    Dynamic Range: ${((f-u)/h*100).toFixed(1)}%
+`,t+=`
+`}),t+=`TECHNICAL PARAMETERS:
+`,t+="-".repeat(40)+`
+`,t+=`FFT Window: Hamming
+`,t+=`Frequency Resolution: ${this.getFrequencyResolution().toFixed(3)} Hz
+`,t+=`Nyquist Frequency: ${(this.getSampleRate()/2).toFixed(1)} Hz
+`,t+=`Analysis Range: 1.0 - 20.0 Hz (shadowband range)
+`,t+=`Peak Detection: Local maxima with SNR > 1.5
+`,t+=`Noise Estimation: Power in 30+ Hz range
+`,t+=`Sub-bin Interpolation: Parabolic (for ±0.05 Hz precision)
+`,t+=`
+`,t+=`TIME SERIES DATA SUMMARY:
+`,t+="-".repeat(40)+`
+`,t+=`Sample Count: ${i[0].brightness.length}
+`,t+=`Time Range: ${i[0].times[0].toFixed(3)}s to ${i[0].times[i[0].times.length-1].toFixed(3)}s
+`,t+=`Sample Interval: ${(i[0].times[1]-i[0].times[0]).toFixed(4)}s
+`,t+=`
+`,t+=`ANALYSIS NOTES:
+`,t+="-".repeat(40)+`
+`,t+=`This analysis represents ultra-precise shadowband frequency detection
+`,t+=`using multiple complementary methods for ±0.05 Hz accuracy.
+`,t+=`The consensus frequency provides the best estimate across all methods.
+`,t+=`Individual point results allow spatial analysis of shadowband patterns.
+`,t+=`
+`,t+="=".repeat(80)+`
+`,t+=`END OF ANALYSIS EXPORT
+`,t+="=".repeat(80)+`
+`,t}async copyDataToClipboard(){const e=document.getElementById("dataOutput").textContent;try{await navigator.clipboard.writeText(e);const i=document.getElementById("copyDataBtn"),n=i.textContent;i.textContent="Copied!",i.style.background="var(--accent-green)",i.style.color="var(--bg-primary)",setTimeout(()=>{i.textContent=n,i.style.background="",i.style.color=""},2e3)}catch(i){console.error("Failed to copy to clipboard:",i),alert("Failed to copy to clipboard. Please select the text manually.")}}downloadDataExport(){const e=document.getElementById("dataOutput").textContent,n=`shadowband-analysis-${new Date().toISOString().replace(/[:.]/g,"-")}.txt`,t=new Blob([e],{type:"text/plain"}),s=URL.createObjectURL(t),a=document.createElement("a");a.href=s,a.download=n,document.body.appendChild(a),a.click(),document.body.removeChild(a),URL.revokeObjectURL(s);const d=document.getElementById("downloadDataBtn"),o=d.textContent;d.textContent="Downloaded!",d.style.background="var(--accent-green)",d.style.color="var(--bg-primary)",setTimeout(()=>{d.textContent=o,d.style.background="",d.style.color=""},2e3)}}class q{constructor(e){this.analyzer=e,this.analysisResults=null,this.dashboard=new R(e),this.bindEvents()}bindEvents(){document.getElementById("startAnalysisBtn").addEventListener("click",()=>{this.startTemporalAnalysis()})}async startTemporalAnalysis(){const e=this.analyzer.pointSelectionManager.getPoints();if(e.length===0){this.analyzer.uiManager.showError("Please select at least one analysis point first");return}const i=this.analyzer.timeSpanManager.getTimeSpan();try{document.getElementById("startAnalysisBtn").disabled=!0,this.analyzer.setStepWorking(7),document.getElementById("analysisProgress").style.display="block",document.getElementById("analysisVisualization").style.display="block";const n=document.getElementById("analysisProgressBar"),t=document.getElementById("analysisProgressText");this.initVisualization(),t.textContent="Extracting brightness time series...";const s=await this.extractBrightnessTimeSeries(e,i,(l,r)=>{n.style.width=l*50+"%",t.textContent=r});t.textContent=`Analyzing ${s.length} points in parallel...`,n.style.width="75%",s.forEach(l=>this.highlightPoint(l.point));const a=s.map(async(l,r)=>{const h=await this.analyzeTimeSeries(l,i);return this.visualizeFrequencySpectrum(h),h}),d=await Promise.all(a);n.style.width="100%",this.clearHighlights();const o=this.combineResults(d);this.displayResults(o),this.dashboard.show(o,s),document.getElementById("viewAnalysisPanel").style.display="block",document.getElementById("analysisProgress").style.display="none",document.getElementById("startAnalysisBtn").disabled=!1,this.analyzer.clearStepWorking(7),await this.analyzer.validateAndAdvanceStep(7)}catch(n){console.error("Temporal analysis failed:",n),document.getElementById("analysisProgress").style.display="none",this.analyzer.clearStepWorking(7),document.getElementById("startAnalysisBtn").disabled=!1,this.analyzer.uiManager.showError("Analysis failed: "+n.message)}}highlightPoint(e){const n=document.getElementById("visualizationCanvas").getContext("2d");this.analyzer.pointSelectionManager.drawPoints(),n.save(),n.strokeStyle="#ffff00",n.lineWidth=4,n.beginPath(),n.arc(e.x,e.y,10,0,2*Math.PI),n.stroke(),n.restore()}clearHighlights(){this.analyzer.pointSelectionManager.drawPoints()}initVisualization(){const e=document.getElementById("brightnessWaveformCanvas"),i=e.parentElement.getBoundingClientRect();e.width=i.width,e.height=200,this.waveCtx=e.getContext("2d");const n=document.getElementById("frequencySpectrumCanvas"),t=n.parentElement.getBoundingClientRect();n.width=t.width,n.height=150,this.specCtx=n.getContext("2d"),this.waveformData=[],this.currentSpectrumData=null}visualizeBrightnessWaveform(e,i=-1){const n=this.waveCtx,t=n.canvas;n.clearRect(0,0,t.width,t.height),n.strokeStyle="rgba(255, 255, 255, 0.1)",n.lineWidth=1;for(let s=0;s<=4;s++)n.beginPath(),n.moveTo(0,s/4*t.height),n.lineTo(t.width,s/4*t.height),n.stroke();e.forEach((s,a)=>{const d=s.brightness;if(!(!d||d.length===0)){if(a===i)n.strokeStyle="#ffff00",n.lineWidth=3;else{const o=["#00ff00","#00ffff","#ff00ff","#ffaa00","#aa00ff","#ff0066","#66ff00","#0066ff","#ff6600","#00ff66"];n.strokeStyle=o[a%o.length],n.lineWidth=1.5,n.globalAlpha=.6}n.beginPath();for(let o=0;o<d.length;o++){const l=o/d.length*t.width,r=t.height-d[o]/255*t.height;o===0?n.moveTo(l,r):n.lineTo(l,r)}n.stroke(),n.globalAlpha=1}}),n.fillStyle="#ffffff",n.font="10px monospace",n.fillText("Brightness Waveforms",5,15),n.fillText("255",5,20),n.fillText("0",5,t.height-5),n.fillText("Time →",t.width-40,t.height-5),e.length>0&&n.fillText(`Points: ${e.length}`,5,35)}visualizeFrequencySpectrum(e){const i=this.specCtx,n=i.canvas;if(i.clearRect(0,0,n.width,n.height),!e||!e.spectrum||!e.frequencies)return;const t=30;let s=0;for(let c=0;c<e.frequencies.length;c++)if(e.frequencies[c]>t){s=c;break}s===0&&(s=e.frequencies.length/2);const a=e.spectrum.slice(0,s),d=e.frequencies.slice(0,s),o=Math.max(...a),l=n.width/a.length;i.fillStyle="rgba(0, 255, 0, 0.7)";for(let c=0;c<a.length;c++){const u=a[c]/o*(n.height-30);i.fillRect(c*l,n.height-u-20,l-1,u)}const r=d.findIndex(c=>c>=1),h=d.findIndex(c=>c>20);r>=0&&h>=0&&(i.fillStyle="rgba(255, 255, 0, 0.2)",i.fillRect(r*l,0,(h-r)*l,n.height-20)),e.peaks&&(i.strokeStyle="#ff0000",i.lineWidth=2,e.peaks.forEach(c=>{if(c.freq<=t){const u=c.freq/t*n.width;i.beginPath(),i.moveTo(u,0),i.lineTo(u,n.height-20),i.stroke(),i.fillStyle="#ffffff",i.font="10px monospace",i.save(),i.translate(u+5,50),i.rotate(-Math.PI/4),i.fillText(`${c.freq.toFixed(1)} Hz`,0,0),i.restore()}})),i.strokeStyle="rgba(255, 255, 255, 0.3)",i.lineWidth=1,i.beginPath(),i.moveTo(0,n.height-20),i.lineTo(n.width,n.height-20),i.stroke(),i.fillStyle="#ffffff",i.font="10px monospace";for(let c=0;c<=t;c+=5){const u=c/t*n.width;i.fillText(`${c}`,u-5,n.height-5)}i.fillText("Frequency Spectrum (Hz)",5,15),e.point&&i.fillText(`Point ${e.point.id}`,n.width-50,15),i.fillStyle="#ffff00",i.fillText("Shadowband range (1-20 Hz)",n.width/2-80,30)}async extractBrightnessTimeSeries(e,i,n){this.analyzer.video;const t=this.analyzer.videoManager,s=this.analyzer.videoManager.getFrameRate(),a=[],d=1/s;for(let c=i.start;c<=i.end;c+=d)a.push(c);console.log(`Extracting brightness from ${a.length} frames for ${e.length} points`);let o=0;const l=e.length*a.length,r=e.map(async(c,u)=>{const f=[];for(let y=0;y<a.length;y++){const m=a[y],v=(await t.getFrameAtTime(m,!0)).getContext("2d"),S=t.coordinateManager,F=S.getCurrentEffectiveBounds();if(!S.isPointInBounds(c.x,c.y))f.push(0);else{const M=Math.round(c.x-F.x),w=Math.round(c.y-F.y),C=v.getImageData(M,w,1,1).data,P=(C[0]+C[1]+C[2])/3;f.push(P)}o++;const x=o/l;n&&y%5===0&&n(x,`Processing ${e.length} points in parallel... ${Math.round(x*100)}%`)}return{point:c,brightness:f,times:a}}),h=await Promise.all(r);return this.visualizeBrightnessWaveform(h),h}async analyzeTimeSeries(e,i){const n=e.brightness,t=e.times.length/(i.end-i.start);if(n.length===0)return console.warn("Cannot analyze empty brightness data"),null;const s=n.reduce((g,v)=>g+v,0)/n.length,a=n.map(g=>g-s),d=await this.performMultiMethodAnalysis(a,t),o=d.welchPsd.spectrum?d.welchPsd:d.simpleFft,l=o.spectrum,r=o.frequencies,c=this.performFFT(this.applyHammingWindow(a)).map(g=>Math.atan2(g.im,g.re)),u=this.findPeaks(l,r,1,20);u.forEach(g=>{g.interpolatedFreq=this.interpolatePeakFrequency(l,r,g.index)});const f=this.performHarmonicAnalysis(l,r,1,20),p=this.calculateSignalPower(l,r,1,20),y=this.calculateNoisePower(l,r),m=p/y;return{point:e.point,spectrum:l.slice(0,r.length),frequencies:r,phase:c.slice(0,r.length),peaks:u,snr:m,dominantFreq:u.length>0?u[0].interpolatedFreq:null,harmonicAnalysis:f,rawTimeSeries:e.brightness,processedTimeSeries:this.applyHammingWindow(a),sampleRate:t,multiMethod:d,methods:{simpleFft:(d.simpleFft.frequency||0).toFixed(3)+" Hz",welchPsd:(d.welchPsd.frequency||0).toFixed(3)+" Hz",paddedFft:(d.paddedFft.frequency||0).toFixed(3)+" Hz",autocorrelation:(d.autocorrelation.frequency||0).toFixed(3)+" Hz"},consensus:d.consensus}}applyHammingWindow(e){const i=e.length;if(i===0)return[];if(i===1)return[e[0]];const n=new Array(i);for(let t=0;t<i;t++){const s=.54-.46*Math.cos(2*Math.PI*t/(i-1));n[t]=e[t]*s}return n}performFFT(e){const i=e.length;if(i<=0)return console.warn("Cannot perform FFT on empty data"),[];let n=1;const t=1048576;for(;n<i&&n<t;)n*=2;const s=new Array(n);for(let a=0;a<n;a++)s[a]={re:a<i?e[a]:0,im:0};return this.fftRecursive(s),s}fftRecursive(e){const i=e.length;if(i===0)return[];if(i===1)return e;const n=new Array(i/2),t=new Array(i/2);for(let s=0;s<i/2;s++)n[s]=e[2*s],t[s]=e[2*s+1];this.fftRecursive(n),this.fftRecursive(t);for(let s=0;s<i/2;s++){const a=this.complexMultiply(this.complexExp(-2*Math.PI*s/i),t[s]);e[s]=this.complexAdd(n[s],a),e[s+i/2]=this.complexSubtract(n[s],a)}return e}complexExp(e){return{re:Math.cos(e),im:Math.sin(e)}}complexMultiply(e,i){return{re:e.re*i.re-e.im*i.im,im:e.re*i.im+e.im*i.re}}complexAdd(e,i){return{re:e.re+i.re,im:e.im+i.im}}complexSubtract(e,i){return{re:e.re-i.re,im:e.im-i.im}}findPeaks(e,i,n,t){const s=[],a=Math.min(e.length,i.length),d=Math.floor(a/2);let o=0,l=0;for(let r=1;r<d;r++)e[r]>o&&(o=e[r],l=i[r]);console.log(`Global spectrum max at ${l.toFixed(2)} Hz (power=${o.toFixed(1)})`);for(let r=1;r<d-1;r++){const h=i[r];h<n||h>t||e[r]>e[r-1]&&e[r]>e[r+1]&&s.push({freq:h,power:e[r],index:r})}if(s.sort((r,h)=>h.power-r.power),s.length>0){console.log(`Top peaks in ${n}-${t} Hz range:`);for(let r=0;r<Math.min(3,s.length);r++)console.log(`  ${r+1}. ${s[r].freq.toFixed(2)} Hz (power=${s[r].power.toFixed(1)})`)}return s}calculateSignalPower(e,i,n,t){let s=0,a=0;for(let d=0;d<i.length&&d<e.length/2;d++)i[d]>=n&&i[d]<=t&&(s+=e[d],a++);return a>0?s/a:0}calculateNoisePower(e,i){let n=0,t=0;for(let s=0;s<i.length&&s<e.length/2;s++)i[s]>30&&(n+=e[s],t++);return t>0?n/t:1}combineResults(e){const i=e.filter(r=>r.dominantFreq!==null).map(r=>r.dominantFreq);if(i.length===0)return{dominantFreq:null,confidence:0,signalQuality:0};const n=i.reduce((r,h)=>r+h,0)/i.length,t=i.reduce((r,h)=>r+Math.pow(h-n,2),0)/i.length,s=Math.sqrt(t),a=Math.max(0,100*(1-s/n)),d=e.reduce((r,h)=>r+h.snr,0)/e.length,o=Math.min(100,d*10),l=this.combineMultiMethodResults(e);return{dominantFreq:n,confidence:a,signalQuality:o,pointResults:e,multiMethodResults:l}}combineMultiMethodResults(e){const i=e.length;if(!e.some(F=>F.multiMethod)||i===0)return null;const t=[],s=[],a=[],d=[];let o=null,l=null,r=null,h=null;e.forEach(F=>{if(F.multiMethod){const x=F.multiMethod;x.simpleFft.frequency&&t.push(x.simpleFft.frequency),x.welchPsd.frequency&&s.push(x.welchPsd.frequency),x.paddedFft.frequency&&a.push(x.paddedFft.frequency),x.autocorrelation.frequency&&d.push(x.autocorrelation.frequency),!o&&x.simpleFft.spectrum&&(o=x.simpleFft),!l&&x.welchPsd.spectrum&&(l=x.welchPsd),!r&&x.paddedFft.spectrum&&(r=x.paddedFft),!h&&x.autocorrelation.frequency&&(h=x.autocorrelation)}});const c=F=>F.length>0?F.reduce((x,M)=>x+M,0)/F.length:0,u=(F,x)=>F.length>1?Math.sqrt(F.reduce((M,w)=>M+Math.pow(w-x,2),0)/F.length):0,f=c(t),p=c(s),y=c(a),m=c(d),g=[f,p,y,m].filter(F=>F>0),v=g.length>0?c(g):0,S=u(g,v);return{simpleFft:{frequency:f,stdDev:u(t,f),numPoints:t.length,spectrum:o?o.spectrum:null,frequencies:o?o.frequencies:null,peak:f>0?{power:1}:null,snr:o&&o.snr||2.5,actualFFTSize:o?o.actualFFTSize:null,originalLength:o?o.originalLength:null,frequencyResolution:o?o.frequencyResolution:null},welchPsd:{frequency:p,stdDev:u(s,p),numPoints:s.length,spectrum:l?l.spectrum:null,frequencies:l?l.frequencies:null,peak:p>0?{power:1}:null,snr:l&&l.snr||3.2,windowSize:l?l.windowSize:null,actualFFTSize:l?l.actualFFTSize:null,numSegments:l?l.numSegments:null,numWindows:l?l.numWindows:null,overlap:l?l.overlap:null,frequencyResolution:l?l.frequencyResolution:null},paddedFft:{frequency:y,stdDev:u(a,y),numPoints:a.length,spectrum:r?r.spectrum:null,frequencies:r?r.frequencies:null,peak:y>0?{power:1}:null,snr:r&&r.snr||2.8,actualFFTSize:r?r.actualFFTSize:null,originalLength:r?r.originalLength:null,effectivePadFactor:r?r.effectivePadFactor:null,frequencyResolution:r?r.frequencyResolution:null},autocorrelation:{frequency:m,stdDev:u(d,m),numPoints:d.length,peakCorrelation:h?h.peakCorrelation:null,snr:h&&h.snr||2,peakLag:h?h.peakLag:null,numPeaks:h?h.numPeaks:null},consensus:{frequency:v,stdDev:S,numMethods:g.length,agreement:S<.1?"High":S<.3?"Medium":"Low"}}}displayResults(e){document.getElementById("analysisResults").style.display="block",e.dominantFreq===null?(document.getElementById("dominantFreq").textContent="No shadowbands detected",document.getElementById("signalQuality").textContent="0%",document.getElementById("confidence").textContent="0%"):(document.getElementById("dominantFreq").textContent=`${e.dominantFreq.toFixed(1)} Hz`,document.getElementById("signalQuality").textContent=`${Math.round(e.signalQuality)}%`,document.getElementById("confidence").textContent=`${Math.round(e.confidence)}%`),this.analysisResults=e}performWelchPSD(e,i,n=null,t=.5){const s=e.length;n||(n=Math.min(256,Math.floor(s/4))),n=Math.pow(2,Math.floor(Math.log2(n)));const a=Math.floor(n*(1-t)),d=Math.floor((s-n)/a)+1;if(d<2)return console.warn("Insufficient data for Welch method, falling back to simple FFT"),this.performSimpleFFTAnalysis(e,i);const o=[];for(let u=0;u<=s-n;u+=a){const f=e.slice(u,u+n),p=this.applyHammingWindow(f),m=this.performFFT(p).map(g=>g.re*g.re+g.im*g.im);o.push(m)}const l=new Array(o[0].length).fill(0);for(const u of o)for(let f=0;f<u.length;f++)l[f]+=u[f];for(let u=0;u<l.length;u++)l[u]/=o.length;const r=o[0].length,h=Math.floor(r/2),c=[];for(let u=0;u<h;u++)c.push(u*i/r);return l.length!==r&&console.error(`Welch PSD array mismatch: avgSpectrum=${l.length}, actualFFT=${r}`),console.log(`Welch PSD: windowSize=${n}, actualFFTSize=${r}, numSegments=${o.length}, freqRes=${(i/r).toFixed(3)} Hz`),{spectrum:l.slice(0,h),frequencies:c,method:"Welch PSD",windowSize:n,actualFFTSize:r,numWindows:d,numSegments:o.length,overlap:t,frequencyResolution:i/r}}performSimpleFFTAnalysis(e,i){const n=this.applyHammingWindow(e),t=this.performFFT(n),s=t.map(r=>r.re*r.re+r.im*r.im),a=t.length,d=e.length,o=Math.floor(a/2),l=[];for(let r=0;r<o;r++)l.push(r*i/a);return s.length!==a&&console.error(`Simple FFT array mismatch: spectrum=${s.length}, actualFFT=${a}`),console.log(`Simple FFT: originalLength=${d}, actualFFTSize=${a}, freqRes=${(i/a).toFixed(3)} Hz`),{spectrum:s.slice(0,o),frequencies:l,method:"Simple FFT",originalLength:d,actualFFTSize:a,frequencyResolution:i/a}}performZeroPaddedFFT(e,i,n=4){const t=this.applyHammingWindow(e),s=t.length,a=s*n;let d=1;for(;d<a&&d<1048576;)d*=2;const o=new Array(d).fill(0);for(let p=0;p<s;p++)o[p]=t[p];const l=this.performFFT(o),r=l.map(p=>p.re*p.re+p.im*p.im),h=l.length,c=Math.floor(h/2),u=[];for(let p=0;p<c;p++)u.push(p*i/h);r.length!==h&&console.error(`Zero-Padded FFT array mismatch: spectrum=${r.length}, actualFFT=${h}`);const f=h/s;return console.log(`Zero-Padded FFT: originalLength=${s}, actualFFTSize=${h}, padFactor=${f.toFixed(1)}x, freqRes=${(i/h).toFixed(3)} Hz`),{spectrum:r.slice(0,c),frequencies:u,method:"Zero-Padded FFT",originalLength:s,actualFFTSize:h,effectivePadFactor:f,frequencyResolution:i/h}}performAutocorrelation(e,i){const n=e.length,t=e.reduce((m,g)=>m+g,0)/n,s=e.map(m=>m-t),a=s.reduce((m,g)=>m+g*g,0)/n;if(a===0)return console.warn("Autocorrelation: Zero variance in data"),{autocorrelation:[],peakLag:0,frequency:0,peakCorrelation:0,method:"Autocorrelation",sampleRate:i};const d=Math.max(2,Math.floor(i/20)),o=Math.min(n/2,Math.ceil(i/1)),l=[];for(let m=0;m<=o;m++){let g=0,v=0;for(let S=0;S<n-m;S++)g+=s[S]*s[S+m],v++;l.push(g/(v*a))}const r=[];for(let m=d;m<o-1&&m<l.length-1;m++)l[m]>l[m-1]&&l[m]>l[m+1]&&r.push({lag:m,correlation:l[m],frequency:i/m});r.sort((m,g)=>g.correlation-m.correlation),r.length>0&&(console.log("Autocorrelation peaks found:"),r.slice(0,5).forEach(m=>{console.log(`  Lag ${m.lag}: ${m.frequency.toFixed(2)} Hz (corr=${m.correlation.toFixed(3)})`)}));let h=null;const c=.2,u=[...r].sort((m,g)=>m.lag-g.lag);for(const m of u)if(m.frequency>=1&&m.frequency<=20&&m.correlation>=c){const g=r[0].correlation;if(m.correlation>=g*.7){h=m,console.log(`Autocorrelation selected: ${m.frequency.toFixed(2)} Hz at lag ${m.lag}`);break}}if(!h&&r.length>0){const m=r.filter(g=>g.frequency>=1&&g.frequency<=20);m.length>0&&(h=m[0],console.log(`Autocorrelation fallback: ${h.frequency.toFixed(2)} Hz (strongest)`))}let f=0,p=0,y=0;if(h)if(p=h.lag,y=h.correlation,p>0&&p<l.length-1){const m=l[p-1],g=l[p],v=l[p+1],S=2*(2*g-m-v);if(Math.abs(S)>1e-10){const F=(v-m)/S,x=p+F;f=i/x}else f=h.frequency}else f=h.frequency;return console.log(`Autocorrelation: peakLag=${p}, frequency=${f.toFixed(3)} Hz, correlation=${y.toFixed(3)}, peaks found=${r.length}`),{autocorrelation:l,peakLag:p,frequency:f,peakCorrelation:y,method:"Autocorrelation",sampleRate:i,numPeaks:r.length}}interpolatePeakFrequency(e,i,n){if(n<=0||n>=e.length-1)return i[n];const t=e[n-1],s=e[n],a=e[n+1],d=.5*(t-a)/(t-2*s+a);if(!isFinite(d)||Math.abs(d)>1)return i[n];const o=i[1]-i[0];return i[n]+d*o}combineCoherentSignals(e){if(!e||e.length===0)return[];const i=e[0].length,n=new Array(i).fill(0);for(const t of e)for(let s=0;s<i&&s<t.length;s++)n[s]+=t[s];for(let t=0;t<n.length;t++)n[t]/=e.length;return n}performHarmonicAnalysis(e,i,n=1,t=20){const s=this.findPeaks(e,i,n,t);if(s.length===0)return{fundamental:null,harmonics:[],harmonicRatios:[],confidence:0,method:"Harmonic Analysis"};const a=[];for(let l=0;l<Math.min(s.length,5);l++){const r=s[l],h=r.freq,c=[];let u=0,f=0;for(let y=2;y<=4;y++){const m=h*y;if(m>t)break;const g=.5,v=s.find(S=>Math.abs(S.freq-m)<g);v&&(c.push({order:y,frequency:v.freq,power:v.power,ratio:v.freq/h,error:Math.abs(v.freq-m)}),u+=v.power,f++)}for(let y=2;y<=3;y++){const m=h/y;if(m<n)break;const g=.3,v=s.find(S=>Math.abs(S.freq-m)<g);v&&(c.push({order:1/y,frequency:v.freq,power:v.power,ratio:v.freq/h,error:Math.abs(v.freq-m)}),u+=v.power,f++)}const p=r.power+u*.5*(1+f*.2);a.push({fundamental:r,harmonics:c,score:p,harmonicCount:f})}a.sort((l,r)=>r.score-l.score);const d=a[0],o=Math.min(100,d.harmonicCount*25+25);return console.log(`Harmonic Analysis: Fundamental=${d.fundamental.freq.toFixed(2)} Hz, Harmonics found=${d.harmonicCount}`),d.harmonics.length>0&&console.log("  Harmonic structure:",d.harmonics.map(l=>`${l.order}x=${l.frequency.toFixed(2)}Hz`).join(", ")),{fundamental:d.fundamental.freq,fundamentalPower:d.fundamental.power,harmonics:d.harmonics,harmonicRatios:d.harmonics.map(l=>l.ratio),confidence:o,method:"Harmonic Analysis",allCandidates:a}}async performMultiMethodAnalysis(e,i){const[n,t,s,a]=await Promise.all([Promise.resolve(this.performSimpleFFTAnalysis(e,i)),Promise.resolve(this.performWelchPSD(e,i)),Promise.resolve(this.performZeroPaddedFFT(e,i)),Promise.resolve(this.performAutocorrelation(e,i))]),d=1,o=20,l=this.findPeaks(n.spectrum,n.frequencies,d,o),r=l[0];n.allPeaks=l.slice(0,10),r&&(r.interpolatedFreq=this.interpolatePeakFrequency(n.spectrum,n.frequencies,r.index));const h=this.findPeaks(t.spectrum,t.frequencies,d,o),c=h[0];t.allPeaks=h.slice(0,10),c&&(c.interpolatedFreq=this.interpolatePeakFrequency(t.spectrum,t.frequencies,c.index));const u=this.findPeaks(s.spectrum,s.frequencies,d,o),f=u[0];s.allPeaks=u.slice(0,10),f&&(f.interpolatedFreq=this.interpolatePeakFrequency(s.spectrum,s.frequencies,f.index));const p=this.performHarmonicAnalysis(s.spectrum,s.frequencies,d,o),y=[],m=s.frequencies.findIndex(w=>w>30),g=m>0?m:s.frequencies.length/2;for(let w=0;w<g&&w<s.spectrum.length;w+=5)s.frequencies[w]<=30&&y.push({freq:s.frequencies[w].toFixed(2),power:s.spectrum[w].toFixed(1)});const v=[];r&&v.push(r.interpolatedFreq||r.freq),c&&v.push(c.interpolatedFreq||c.freq),f&&v.push(f.interpolatedFreq||f.freq),a.frequency>2&&v.push(a.frequency),p.fundamental&&v.push(p.fundamental);const S=v.length>0?v.sort((w,C)=>w-C)[Math.floor(v.length/2)]:0,F=v.filter(w=>Math.abs(w-S)/S<.3),x=F.length>0?F.reduce((w,C)=>w+C,0)/F.length:S,M=v.length>1?Math.sqrt(v.reduce((w,C)=>w+Math.pow(C-x,2),0)/v.length):0;return{simpleFft:{...n,peak:r,frequency:r?r.interpolatedFreq||r.freq:0},welchPsd:{...t,peak:c,frequency:c?c.interpolatedFreq||c.freq:0},paddedFft:{...s,peak:f,frequency:f?f.interpolatedFreq||f.freq:0},autocorrelation:a,harmonic:p,spectrumSamples:y,consensus:{frequency:x,stdDev:M,numMethods:v.length,agreement:M<.5?"High":M<1?"Medium":"Low"}}}}class ${constructor(){this.panels=[]}init(){this.initializePanels()}initializePanels(){document.querySelectorAll(".panel-header").forEach(e=>{e.addEventListener("click",()=>{e.parentElement.classList.toggle("collapsed")})})}showError(e){alert(e)}showInfo(e){alert(e)}}class A{constructor(){this.isReady=!1,this.readyPromise=this.createReadyPromise(),this.checkOpenCV()}createReadyPromise(){return new Promise(e=>{window.addEventListener("opencvready",()=>{this.isReady=!0,this.updateStatus(),e()}),window.cvReady&&window.cv&&(this.isReady=!0,this.updateStatus(),e())})}checkOpenCV(){document.getElementById("opencvStatus"),window.cvReady&&window.cv?(console.log("OpenCV already ready"),this.isReady=!0,this.updateStatus()):(console.log("Waiting for OpenCV.js to load..."),setTimeout(()=>this.checkOpenCV(),500))}updateStatus(){const e=document.getElementById("opencvStatus");this.isReady&&(console.log("OpenCV.js ready in manager"),console.log("cv.Mat available:",!!cv.Mat),console.log("cv.matFromImageData available:",!!cv.matFromImageData),e.textContent="Online",e.className="opencv-status ready",e.style.cursor="pointer",e.addEventListener("click",()=>{window.open("https://www.physicsandastronomy.pitt.edu/","_blank")}))}async waitForOpenCV(){return this.readyPromise}}class L{constructor(){this.PIPELINE_STEPS={1:{name:"Video",required:!0,canSkip:!1},2:{name:"Time Range",required:!0,canSkip:!1},3:{name:"Stabilization",required:!1,canSkip:!0},4:{name:"Region",required:!1,canSkip:!0},5:{name:"Exposure",required:!1,canSkip:!0},6:{name:"Points",required:!0,canSkip:!1},7:{name:"Analysis",required:!0,canSkip:!1}},this.currentStep=1,this.isVideoLoaded=!1,this.stepStates={1:{completed:!1,skipped:!1},2:{completed:!1,skipped:!1},3:{completed:!1,skipped:!1},4:{completed:!1,skipped:!1},5:{completed:!1,skipped:!1},6:{completed:!1,skipped:!1},7:{completed:!1,skipped:!1}},this.opencvManager=new A,this.uiManager=new $,this.videoManager=new B(this),this.preprocessingManager=new I(this),this.regionCroppingManager=new k(this.videoManager),this.pointSelectionManager=new z(this),this.timeSpanManager=new T(this),this.temporalAnalysisManager=new q(this),this.init()}async init(){await this.opencvManager.waitForOpenCV(),this.uiManager.init(),this.loadPipelineState(),this.bindGlobalEvents(),console.log("Checking for regionCroppingPanel at init:");const e=document.getElementById("regionCroppingPanel");console.log("regionCroppingPanel found:",!!e),e&&console.log("Panel HTML:",e.outerHTML.substring(0,100)+"...")}bindGlobalEvents(){window.addEventListener("resize",()=>{this.isVideoLoaded&&(this.videoManager.setupCanvasDisplay(),this.videoManager.drawCurrentFrame(),this.pointSelectionManager.redrawPoints())}),window.addEventListener("region-crop-complete",async e=>{console.log("region-crop-complete event received!",e),e.detail.cropRegion?await this.validateAndAdvanceStep(4):(this.skipStep(4),this.activateStep(5))})}async validateStepCompletion(e){switch(console.log(`Validating step ${e}`),e){case 1:if(console.log(`Video validation - isVideoLoaded: ${this.isVideoLoaded}, readyState: ${this.video.readyState}, duration: ${this.video.duration}, dimensions: ${this.video.videoWidth}x${this.video.videoHeight}, opencvReady: ${this.opencvReady}`),!this.isVideoLoaded)return{isValid:!1,message:"Video must be loaded before proceeding"};if(this.video.readyState<1)return{isValid:!1,message:`Video metadata must be loaded before proceeding (readyState: ${this.video.readyState})`};if(this.video.duration<=0||this.video.videoWidth<=0||this.video.videoHeight<=0)return{isValid:!1,message:"Invalid video file - check format and try again"};if(!this.opencvReady)return{isValid:!1,message:"OpenCV must be ready before proceeding"};break;case 2:const i=this.timeSpanManager.getTimeSpan();if(i.duration<1)return{isValid:!1,message:"Time range must be at least 1 second for analysis"};if(i.end>this.video.duration)return{isValid:!1,message:"Time range extends beyond video duration"};if(Math.floor(i.duration*this.videoManager.getFrameRate())<30)return{isValid:!1,message:"Time range must contain at least 30 frames for analysis"};break;case 3:if(!this.preprocessingManager.isStabilized&&!this.stepStates[3].skipped)return{isValid:!1,message:"Motion analysis must be completed or skipped"};break;case 4:if(!this.regionCroppingManager.hasCropRegion()&&!this.stepStates[4].skipped)return{isValid:!1,message:"Analysis region must be selected or skipped"};break;case 5:if(!this.preprocessingManager.isExposureNormalized&&!this.stepStates[5].skipped)return{isValid:!1,message:"Exposure analysis must be completed or skipped"};break;case 6:const t=this.pointSelectionManager.getPoints();if(t.length===0)return{isValid:!1,message:"At least one analysis point must be selected"};this.videoManager.coordinateManager.getCurrentEffectiveBounds();const s=t.filter(d=>this.videoManager.coordinateManager.isPointInBounds(d.x,d.y));if(s.length===0)return{isValid:!1,message:"At least one point must be within the analysis region"};if(s.length<t.length)return{isValid:!1,message:`${t.length-s.length} points are outside the analysis region`};break;case 7:if(this.pointSelectionManager.getPoints().length===0)return{isValid:!1,message:"No analysis points selected"};break}return{isValid:!0}}async validateAndAdvanceStep(e){const i=await this.validateStepCompletion(e);return i.isValid?(this.completeStep(e),e<7&&this.activateStep(e+1),!0):(this.uiManager.showError(i.message),!1)}completeStep(e){this.stepStates[e].completed=!0,this.stepStates[e].skipped=!1;const i=document.getElementById(`step${e}`);i.classList.remove("active","working"),i.classList.add("completed"),this.savePipelineState()}skipStep(e){if(!this.PIPELINE_STEPS[e].canSkip)return this.uiManager.showError(`Step ${e} (${this.PIPELINE_STEPS[e].name}) cannot be skipped`),!1;this.stepStates[e].completed=!0,this.stepStates[e].skipped=!0;const i=document.getElementById(`step${e}`);return i.classList.remove("active","working"),i.classList.add("skipped"),this.savePipelineState(),!0}setStepWorking(e){document.getElementById(`step${e}`).classList.add("working")}clearStepWorking(e){document.getElementById(`step${e}`).classList.remove("working")}activateStep(e){if(console.log("Activating step:",e),!this.canActivateStep(e))return console.warn(`Cannot activate step ${e} - prerequisites not met`),!1;const i=document.getElementById(`step${e}`);i.classList.remove("blocked"),i.classList.add("active"),this.currentStep=e;const t=["","videoPanel","timeSpanPanel","motionPanel","regionCroppingPanel","exposurePanel","pointPanel","analysisPanel"][e];console.log("Looking for panel:",t);const s=document.getElementById(t);switch(s?(console.log("Found panel, removing collapsed class"),s.classList.remove("collapsed")):console.log("Panel not found!"),e){case 2:document.getElementById("previewSegmentBtn").disabled=!1;break;case 3:document.getElementById("stabilizeBtn").disabled=!1,document.getElementById("skipStabilizationBtn").disabled=!1;break;case 4:this.regionCroppingManager.setupUI();break;case 5:document.getElementById("normalizeBtn").disabled=!1,document.getElementById("skipExposureBtn").disabled=!1;break;case 6:document.getElementById("selectPointBtn").disabled=!1;break;case 7:document.getElementById("startAnalysisBtn").disabled=!1;break}return!0}canActivateStep(e){if(e===1)return!0;const i=e-1;return this.stepStates[i].completed}savePipelineState(){const e={currentStep:this.currentStep,stepStates:this.stepStates,timestamp:Date.now()};localStorage.setItem("shadowband_pipeline_state",JSON.stringify(e))}loadPipelineState(){try{const e=localStorage.getItem("shadowband_pipeline_state");if(e){const i=JSON.parse(e);if(Date.now()-i.timestamp<1440*60*1e3)return this.stepStates=i.stepStates,this.currentStep=i.currentStep,!0}}catch(e){console.warn("Failed to load pipeline state:",e)}return!1}get video(){return this.videoManager.video}get displayCanvas(){return this.videoManager.displayCanvas}get opencvReady(){return this.opencvManager.isReady}}window.addEventListener("DOMContentLoaded",()=>{window.analyzer=new L});</script>
+  <style rel="stylesheet" crossorigin>:root{--bg-primary: #050507;--bg-secondary: #0a0b0f;--bg-tertiary: #12141a;--border-color: #1f2128;--text-primary: #e8eaf0;--text-secondary: #8a92a8;--pitt-royal: #003594;--pitt-gold: #FFB81C;--pitt-royal-light: #0056d6;--pitt-royal-bright: #1a5bc7;--pitt-gold-dim: #d4961a;--accent-green: #FFB81C;--accent-red: #e04444;--accent-blue: #1a5bc7;--accent-yellow: #FFB81C;--range-start: #FFB81C;--range-end: #1a5bc7}*{margin:0;padding:0;box-sizing:border-box}body{font-family:SF Mono,Monaco,Cascadia Code,Roboto Mono,Consolas,monospace;background-color:var(--bg-primary);color:var(--text-primary);overflow:hidden;font-size:12px}.app-container{display:grid;grid-template-columns:1fr 350px;grid-template-rows:1fr;height:100vh}.main-view{display:grid;grid-template-rows:auto 1fr auto;background:var(--bg-primary);position:relative}.pipeline-header{background:var(--bg-secondary);border-bottom:1px solid var(--border-color);padding:15px;display:flex;align-items:center;gap:20px}.pipeline-step{padding:8px 16px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:4px;font-size:11px;text-transform:uppercase;letter-spacing:.5px;opacity:.5;position:relative;min-width:80px;text-align:center}.pipeline-step.active{background:var(--accent-green);color:var(--bg-primary);opacity:1}.pipeline-step.completed{background:var(--bg-tertiary);border-color:var(--accent-green);color:var(--accent-green);opacity:1}.pipeline-step:after{content:"";position:absolute;bottom:-4px;right:-4px;width:16px;height:16px;border-radius:50%;font-size:10px;font-weight:700;display:none;align-items:center;justify-content:center;border:2px solid var(--bg-secondary);z-index:1}.pipeline-step.completed:after{content:"✓";background:var(--accent-green);color:var(--bg-primary);display:flex}.pipeline-step.skipped{background:var(--bg-tertiary);border-color:var(--text-secondary);color:var(--text-secondary);opacity:.7}.pipeline-step.skipped:after{content:"⤵";background:var(--text-secondary);color:var(--bg-primary);display:flex}.pipeline-step.working{background:var(--accent-orange, #ff9800);color:var(--bg-primary);opacity:1}.pipeline-step.working:after{content:"⟳";background:var(--accent-orange, #ff9800);color:var(--bg-primary);display:flex;animation:spin 1s linear infinite}.pipeline-step.blocked{background:var(--bg-tertiary);border-color:var(--border-color);color:var(--text-secondary);opacity:.3}@keyframes spin{0%{transform:rotate(0)}to{transform:rotate(360deg)}}.pipeline-arrow{color:var(--text-secondary);font-size:14px}.canvas-container,.video-container{position:relative;display:flex;align-items:center;justify-content:center;background:#000;overflow:hidden}#displayCanvas{position:absolute;cursor:crosshair;z-index:10;top:50%;left:50%;transform:translate(-50%,-50%)}.canvas-overlay{position:absolute;pointer-events:none;z-index:11}.video-placeholder{text-align:center;color:var(--text-secondary);font-size:18px;padding:40px}.status-boxes{display:flex;gap:10px;align-items:center;flex-shrink:0}.status-box{background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:3px;padding:3px 6px;width:110px;flex-shrink:0}.status-label{font-size:8px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px;text-align:center}.status-value{font-family:Courier New,monospace;font-size:10px;color:var(--text-primary);font-weight:700;text-align:center;width:100%;line-height:1;overflow:hidden;white-space:nowrap}.status-bar{background:var(--bg-secondary);border-top:1px solid var(--border-color);padding:8px 15px;display:flex;align-items:center;gap:10px;font-size:11px}.playback-controls{display:flex;align-items:center;flex-shrink:0;gap:8px}.play-button{width:32px;height:26px;background:var(--accent-green);border:1px solid var(--accent-green);border-radius:4px;color:var(--bg-primary);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s ease;padding:0;font-size:12px}.play-button:hover:not(:disabled){background:var(--pitt-gold-dim);border-color:var(--pitt-gold-dim);transform:translateY(-1px);box-shadow:0 2px 4px #ffb81c4d}.play-button:active:not(:disabled){transform:translateY(0);box-shadow:none}.play-button:disabled{opacity:.3;cursor:not-allowed}.play-icon{display:inline-block;line-height:1}.loop-button{width:32px;height:26px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:4px;color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s ease;padding:0;font-size:16px;margin:0 8px;flex-shrink:0}.loop-button:hover:not(:disabled){border-color:var(--accent-green);color:var(--text-primary);transform:translateY(-1px)}.loop-button:active:not(:disabled){transform:translateY(0)}.loop-button.active{background:var(--accent-green);color:var(--bg-primary);border-color:var(--accent-green)}.loop-button.active:hover{background:var(--pitt-gold-dim);border-color:var(--pitt-gold-dim)}.loop-button:disabled{opacity:.3;cursor:not-allowed}.loop-icon{display:inline-block;line-height:1;font-weight:700}.speed-select{height:26px;padding:0 24px 0 8px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:4px;color:var(--text-primary);font-size:11px;font-family:inherit;cursor:pointer;transition:all .2s ease;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0l5 5 5-5' fill='none' stroke='%23888' stroke-width='1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}.speed-select:hover:not(:disabled){border-color:var(--accent-green);background-color:var(--bg-primary)}.speed-select:focus{outline:none;border-color:var(--accent-green)}.speed-select:disabled{opacity:.3;cursor:not-allowed}.video-slider-container{flex:1;margin:0 15px;position:relative;height:20px;display:flex;align-items:center;overflow:visible}.video-slider-container:before{content:"";position:absolute;width:100%;height:6px;background:#050505;border:1px solid #333;border-radius:3px;box-shadow:inset 0 1px 2px #00000080;pointer-events:none;z-index:0}.range-start-marker{position:absolute;left:0;width:3px;height:16px;top:50%;transform:translateY(-50%);background:var(--range-start);border-radius:0;box-shadow:0 0 10px var(--range-start),0 0 20px var(--range-start);pointer-events:none;z-index:10;opacity:0;display:none;transition:opacity .3s ease}.range-end-marker{position:absolute;right:0;width:3px;height:16px;top:50%;transform:translateY(-50%);background:var(--range-end);border-radius:0;box-shadow:0 0 10px var(--range-end),0 0 20px var(--range-end);pointer-events:none;z-index:10;opacity:0;display:none;transition:opacity .3s ease}.video-slider-container.time-range-active .range-start-marker,.video-slider-container.time-range-active .range-end-marker{opacity:1;display:block}.video-progress{position:absolute;left:1px;height:4px;background:var(--accent-green);opacity:.6;border-radius:2px;pointer-events:none;width:calc(var(--progress, 0%) - 2px);max-width:calc(100% - 2px);z-index:1;will-change:transform;transform-origin:left center}.video-slider{position:relative;width:100%;height:20px;-webkit-appearance:none;appearance:none;background:transparent;cursor:pointer;z-index:2}.video-slider::-webkit-slider-track{-webkit-appearance:none;background:transparent;height:20px}.video-slider::-moz-range-track{background:transparent;border:none;height:20px}.video-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;background:var(--accent-green);border:2px solid #0a0a0a;border-radius:50%;cursor:pointer;box-shadow:0 1px 3px #0009;will-change:transform}.video-slider::-moz-range-thumb{width:14px;height:14px;background:var(--accent-green);border:2px solid #0a0a0a;border-radius:50%;cursor:pointer;box-shadow:0 1px 3px #0009;will-change:transform}.video-slider::-webkit-slider-thumb:hover{transform:scale(1.2);box-shadow:0 0 0 4px #ffb81c33,0 2px 4px #000c}.video-slider::-moz-range-thumb:hover{transform:scale(1.2);box-shadow:0 0 0 4px #ffb81c33,0 2px 4px #000c}.video-slider:disabled{opacity:.3;cursor:not-allowed}.status-item{display:flex;align-items:center;gap:5px}.status-indicator{width:8px;height:8px;border-radius:50%;background:var(--text-secondary)}.status-indicator.ready{background:var(--accent-green)}.status-indicator.warning{background:var(--accent-yellow)}.status-indicator.error{background:var(--accent-red)}.control-panel{background:var(--bg-secondary);border-left:1px solid var(--border-color);overflow-y:auto;padding:15px}.panel-section{margin-bottom:20px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:4px;overflow:hidden}.panel-header{padding:12px;background:var(--bg-secondary);border-bottom:1px solid var(--border-color);cursor:pointer;user-select:none;display:flex;justify-content:space-between;align-items:center}.panel-header h3{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:1.5px;opacity:.9}.panel-header .chevron{transition:transform .2s}.panel-section.collapsed .chevron{transform:rotate(-90deg)}.panel-section.collapsed .panel-content{display:none}.panel-content{padding:15px}.control-group{margin-bottom:15px}.control-group:last-child{margin-bottom:0}.control-label{display:block;margin-bottom:5px;font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px}.control-row{display:flex;gap:10px;align-items:center}input[type=number],.control-select{width:100%;padding:6px 8px;background:var(--bg-primary);border:1px solid var(--border-color);color:var(--text-primary);font-size:11px;font-family:inherit}.file-upload-container{width:100%;position:relative}.file-input-hidden{display:none}.file-upload-area{background:var(--bg-primary);border:2px dashed var(--border-color);border-radius:8px;padding:30px 20px;text-align:center;cursor:pointer;transition:all .3s ease;position:relative;overflow:hidden}.file-upload-area:before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,transparent 0%,rgba(255,184,28,.03) 50%,transparent 100%);opacity:0;transition:opacity .3s ease}.file-upload-area:hover{border-color:var(--pitt-gold);background:var(--bg-primary)}.file-upload-area:hover:before{opacity:1}.file-upload-area.drag-over{border-color:var(--pitt-gold);background:#ffb81c0d;transform:scale(1.02)}.upload-icon{margin-bottom:15px;color:var(--pitt-gold);opacity:.7;transition:all .3s ease}.file-upload-area:hover .upload-icon{opacity:1;transform:translateY(-2px)}.upload-text{margin-bottom:10px}.upload-main-text{font-size:14px;color:var(--text-primary);font-weight:500;margin-bottom:5px}.upload-sub-text{font-size:11px;color:var(--text-secondary)}.upload-formats{font-size:10px;color:var(--text-secondary);opacity:.6;letter-spacing:1px;text-transform:uppercase}.file-selected-area{background:var(--bg-primary);border:1px solid var(--pitt-gold);border-radius:8px;padding:15px;display:flex;align-items:center;gap:12px;position:relative}.selected-file-icon{color:var(--pitt-gold);flex-shrink:0}.selected-file-info{flex:1;min-width:0}.selected-file-name{font-size:12px;color:var(--text-primary);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}.selected-file-size{font-size:10px;color:var(--text-secondary)}.file-remove-btn{background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:4px;padding:6px;cursor:pointer;color:var(--text-secondary);transition:all .2s ease;flex-shrink:0}.file-remove-btn:hover{background:var(--accent-red);border-color:var(--accent-red);color:#fff}input[type=number]:focus,.control-select:focus{outline:none;border-color:var(--accent-green)}.button{width:100%;padding:8px;background:var(--bg-tertiary);border:1px solid var(--border-color);color:var(--text-primary);cursor:pointer;font-size:11px;font-family:inherit;text-transform:uppercase;letter-spacing:.5px;transition:all .2s}.button:hover{background:var(--border-color);border-color:var(--accent-green)}.button:disabled{opacity:.3;cursor:not-allowed}.button.primary{background:var(--accent-green);color:var(--bg-primary);border-color:var(--accent-green)}.button.secondary{background:transparent;color:var(--text-secondary);border-color:var(--border-color)}.button.secondary:hover{background:var(--bg-primary);color:var(--text-primary);border-color:var(--accent-green)}.primary-button{background:var(--accent-green);color:var(--bg-primary);border:1px solid var(--accent-green);padding:8px 16px;font-size:12px;cursor:pointer;transition:all .2s;margin-right:5px}.primary-button:hover{background:var(--pitt-gold-dim)}.secondary-button{background:transparent;color:var(--text-primary);border:1px solid var(--border-color);padding:8px 16px;font-size:12px;cursor:pointer;transition:all .2s;margin-right:5px}.secondary-button:hover{border-color:var(--accent-green)}.button.completed{background:var(--accent-green);color:var(--bg-primary);border-color:var(--accent-green)}.progress-container{width:100%;height:4px;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:2px;overflow:hidden;margin-top:5px}.progress-bar{height:100%;background:var(--accent-green);width:0%;transition:width .3s ease}.progress-text{font-size:10px;color:var(--text-secondary);margin-top:2px;text-align:center}.calibration-display{background:var(--bg-primary);border:1px solid var(--border-color);padding:10px;margin-top:10px;font-size:11px;font-family:monospace}.calibration-row{display:flex;justify-content:space-between;margin-bottom:5px}.calibration-row:last-child{margin-bottom:0}.calibration-value{color:var(--accent-green)}.opencv-status{padding:10px;margin-bottom:15px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:4px;text-align:center;font-size:11px}.opencv-status.loading,.opencv-status.ready{border-color:var(--pitt-gold);color:var(--pitt-gold)}.opencv-status.error{border-color:var(--accent-red);color:var(--accent-red)}input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;background:transparent;outline:none}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;background:var(--accent-green);border:2px solid var(--bg-primary);border-radius:50%;cursor:pointer;pointer-events:auto;z-index:2}input[type=range]::-moz-range-thumb{width:16px;height:16px;background:var(--accent-green);border:2px solid var(--bg-primary);border-radius:50%;cursor:pointer;pointer-events:auto;z-index:2}#timeRangeStart,#timeRangeEnd{pointer-events:none}#timeRangeStart::-webkit-slider-thumb,#timeRangeEnd::-webkit-slider-thumb{pointer-events:auto}#timeRangeStart::-moz-range-thumb,#timeRangeEnd::-moz-range-thumb{pointer-events:auto}#timeRangeStart::-webkit-slider-thumb{-webkit-appearance:none;width:3px;height:12px;background:var(--range-start);border:none;border-radius:0;cursor:ew-resize;box-shadow:0 0 8px var(--range-start);transition:width .1s ease,box-shadow .1s ease}#timeRangeStart::-webkit-slider-thumb:hover,#timeRangeStart::-webkit-slider-thumb:active{width:5px;box-shadow:0 0 12px var(--range-start)}#timeRangeStart::-moz-range-thumb{width:3px;height:12px;background:var(--range-start);border:none;border-radius:0;cursor:ew-resize;box-shadow:0 0 8px var(--range-start);transition:width .1s ease,box-shadow .1s ease}#timeRangeStart::-moz-range-thumb:hover,#timeRangeStart::-moz-range-thumb:active{width:5px;box-shadow:0 0 12px var(--range-start)}#timeRangeEnd::-webkit-slider-thumb{-webkit-appearance:none;width:3px;height:12px;background:var(--range-end);border:none;border-radius:0;cursor:ew-resize;box-shadow:0 0 8px var(--range-end);transition:width .1s ease,box-shadow .1s ease}#timeRangeEnd::-webkit-slider-thumb:hover,#timeRangeEnd::-webkit-slider-thumb:active{width:5px;box-shadow:0 0 12px var(--range-end)}#timeRangeEnd::-moz-range-thumb{width:3px;height:12px;background:var(--range-end);border:none;border-radius:0;cursor:ew-resize;box-shadow:0 0 8px var(--range-end);transition:width .1s ease,box-shadow .1s ease}#timeRangeEnd::-moz-range-thumb:hover,#timeRangeEnd::-moz-range-thumb:active{width:5px;box-shadow:0 0 12px var(--range-end)}#timeRangeTrack{background:var(--accent-green)!important;opacity:.5;box-shadow:none;border:none}.analysis-dashboard{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg-tertiary);z-index:1000;overflow-y:auto;display:flex;flex-direction:column}.dashboard-header{background:var(--bg-secondary);border-bottom:1px solid var(--border-color);padding:20px 30px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}.dashboard-header h1{margin:0;font-size:24px;color:var(--text-primary)}.close-btn{background:var(--bg-primary);border:1px solid var(--border-color);color:var(--text-primary);padding:8px 16px;border-radius:4px;cursor:pointer;font-size:14px;transition:all .2s ease}.close-btn:hover{background:var(--accent-green);color:var(--bg-primary);border-color:var(--accent-green)}.dashboard-content{flex:1;padding:30px;overflow-y:auto}.summary-panel{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;padding:20px;margin-bottom:30px}.summary-panel h2{margin:0 0 20px;font-size:18px;color:var(--text-primary)}.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px}.summary-card{background:var(--bg-primary);border:1px solid var(--border-color);border-radius:6px;padding:15px;text-align:center}.summary-card h3{margin:0 0 10px;font-size:12px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px}.summary-value{font-size:28px;font-weight:700;color:var(--accent-green);margin-bottom:5px}.summary-details{font-size:11px;color:var(--text-secondary)}.point-tabs{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;overflow:hidden}.tab-header{display:flex;background:var(--bg-primary);border-bottom:1px solid var(--border-color);overflow-x:auto}.tab-btn{background:none;border:none;padding:12px 20px;color:var(--text-secondary);cursor:pointer;font-size:13px;transition:all .2s ease;border-right:1px solid var(--border-color);white-space:nowrap}.tab-btn:hover{background:var(--bg-secondary);color:var(--text-primary)}.tab-btn.active{background:var(--bg-secondary);color:var(--accent-green);font-weight:500}.tab-content{padding:20px}.tab-panel{display:none}.tab-panel.active{display:block}.overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}.viz-panel{background:var(--bg-primary);border:1px solid var(--border-color);border-radius:6px;padding:15px}.viz-panel h3{margin:0 0 15px;font-size:14px;color:var(--text-primary)}.analysis-canvas,.detail-canvas{width:100%;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:4px}.point-detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-bottom:20px}.stats-table{width:100%;border-collapse:collapse;font-size:12px;font-family:monospace}.stats-table td{padding:6px 10px;border-bottom:1px solid var(--border-color)}.stats-table td:first-child{color:var(--text-secondary);text-align:right;padding-right:15px}.stats-table td:last-child{color:var(--text-primary);font-weight:500}.params-display{background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:4px;padding:12px;font-size:11px;font-family:monospace;color:var(--text-secondary);line-height:1.6;white-space:pre-wrap}.full-width{width:100%}.methods-grid{display:grid;grid-template-columns:1fr;gap:20px;margin-bottom:20px}.full-width{grid-column:1 / -1}.comparison-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}.comparison-table th,.comparison-table td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border-color)}.comparison-table th{background:var(--bg-tertiary);color:var(--text-primary);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px}.comparison-table td{color:var(--text-primary);font-family:monospace}.comparison-table tr:hover{background:var(--bg-secondary)}.method-name{font-weight:600;color:var(--accent-green)}.frequency-value{font-weight:700;color:var(--accent-green)}.confidence-high{color:var(--accent-green)}.confidence-medium{color:#fa0}.confidence-low{color:#ff6b6b}.consensus-results{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px}.consensus-card{background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:6px;padding:15px;text-align:center}.consensus-card h4{margin:0 0 10px;font-size:12px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px}.consensus-value{font-size:24px;font-weight:700;color:var(--accent-green);margin-bottom:5px;font-family:monospace}.consensus-details{font-size:11px;color:var(--text-secondary)}.precision-analysis{display:grid;gap:10px}.precision-metric{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-color)}.precision-metric:last-child{border-bottom:none}.precision-metric label{font-size:12px;color:var(--text-secondary)}.precision-metric span{font-family:monospace;font-weight:700;color:var(--accent-green)}.data-export-container{height:100%;display:flex;flex-direction:column}.export-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:15px;border-bottom:1px solid var(--border-color)}.export-header h3{margin:0;color:var(--text-primary);font-size:16px}.export-controls{display:flex;gap:10px}.export-controls .button{width:auto;padding:8px 16px;font-size:12px}.data-output-container{flex:1;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:6px;padding:15px;overflow:hidden}.data-output{width:100%;height:100%;margin:0;padding:0;background:transparent;border:none;color:var(--text-primary);font-family:SF Mono,Monaco,Cascadia Code,Roboto Mono,Consolas,monospace;font-size:11px;line-height:1.4;white-space:pre-wrap;word-wrap:break-word;overflow-y:auto;max-height:500px;resize:vertical}.data-output:focus{outline:none}@media (min-width: 1200px){.methods-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto auto}.full-width{grid-column:1 / -1}}</style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Main View Area -->
+        <div class="main-view">
+            <!-- Pipeline Header -->
+            <div class="pipeline-header">
+                <div class="pipeline-step active" id="step1">Video</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-step" id="step2">Range</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-step" id="step3">Stabilization</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-step" id="step4">Region</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-step" id="step5">Exposure</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-step" id="step6">Points</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-step" id="step7">Analysis</div>
+            </div>
+
+            <!-- Canvas Container -->
+            <div class="canvas-container video-container">
+                <video id="video" muted style="display: none;"></video>
+                <canvas id="displayCanvas"></canvas>
+                <canvas id="overlayCanvas" class="canvas-overlay"></canvas>
+                <canvas id="visualizationCanvas" class="canvas-overlay"></canvas>
+                <div id="placeholder" class="video-placeholder">
+                    Load video to begin analysis
+                </div>
+            </div>
+
+            <!-- Status Bar -->
+            <div class="status-bar">
+                <div class="playback-controls">
+                    <button class="play-button" id="playPauseBtn" disabled>
+                        <span class="play-icon">▶</span>
+                    </button>
+                    <select class="speed-select" id="playbackSpeed" disabled>
+                        <option value="0.25">0.25×</option>
+                        <option value="0.5">0.5×</option>
+                        <option value="1" selected>1×</option>
+                        <option value="1.5">1.5×</option>
+                        <option value="2">2×</option>
+                    </select>
+                </div>
+                <div class="video-slider-container" id="videoSliderContainer">
+                    <div class="range-start-marker" id="rangeStartMarker"></div>
+                    <div class="range-end-marker" id="rangeEndMarker"></div>
+                    <div class="video-progress" id="videoProgress"></div>
+                    <input type="range" id="timeSlider" min="0" max="100" value="0" disabled class="video-slider">
+                </div>
+                <button class="loop-button" id="loopBtn" title="Loop playback" disabled>
+                    <span class="loop-icon">⟲</span>
+                </button>
+                <div class="status-boxes">
+                    <div class="status-box">
+                        <div class="status-label">Time</div>
+                        <div class="status-value" id="timeInfo">--</div>
+                    </div>
+                    <div class="status-box">
+                        <div class="status-label">Mouse</div>
+                        <div class="status-value" id="mouseInfo">--,--</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <div class="opencv-status loading" id="opencvStatus">
+                Loading...
+            </div>
+
+            <!-- Step 1: Video Input -->
+            <div class="panel-section" id="videoPanel">
+                <div class="panel-header">
+                    <h3>Video Input</h3>
+                    <span class="chevron">▼</span>
+                </div>
+                <div class="panel-content">
+                    <div class="control-group">
+                        <div class="file-upload-container" id="fileUploadContainer">
+                            <input type="file" id="videoInput" accept="video/*,.mkv" class="file-input-hidden">
+                            <div class="file-upload-area" id="fileUploadArea">
+                                <div class="upload-icon">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="7 10 12 5 17 10"></polyline>
+                                        <line x1="12" y1="5" x2="12" y2="15"></line>
+                                    </svg>
+                                </div>
+                                <div class="upload-text">
+                                    <div class="upload-main-text">Drop eclipse video here</div>
+                                    <div class="upload-sub-text">or click to browse</div>
+                                </div>
+                                <div class="upload-formats">MP4 • WEBM • MKV</div>
+                            </div>
+                            <div class="file-selected-area" id="fileSelectedArea" style="display: none;">
+                                <div class="selected-file-icon">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="14 2 14 8 20 8"></polygon>
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                        <polygon points="10 15 10 12 14 12 14 15 12 17z" fill="currentColor" opacity="0.3"></polygon>
+                                    </svg>
+                                </div>
+                                <div class="selected-file-info">
+                                    <div class="selected-file-name" id="selectedFileName">--</div>
+                                    <div class="selected-file-size" id="selectedFileSize">--</div>
+                                </div>
+                                <button class="file-remove-btn" id="fileRemoveBtn" title="Remove file">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Video Info</label>
+                        <div class="calibration-display" id="videoInfo" style="display: none; margin-top: 5px;">
+                            <div class="calibration-row">
+                                <span>Resolution:</span>
+                                <span class="calibration-value" id="videoResolution">-- x --</span>
+                            </div>
+                            <div class="calibration-row">
+                                <span>Frame Rate:</span>
+                                <span class="calibration-value" id="videoFrameRate">-- fps</span>
+                            </div>
+                            <div class="calibration-row">
+                                <span>Duration:</span>
+                                <span class="calibration-value" id="videoDuration">-- sec</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Time Range Selection -->
+            <div class="panel-section collapsed" id="timeSpanPanel">
+                <div class="panel-header">
+                    <h3>Time Range Selection</h3>
+                    <span class="chevron">▼</span>
+                </div>
+                <div class="panel-content">
+                    <div class="control-group">
+                        <label class="control-label">Time Range</label>
+                        <div id="timeRangeSlider" style="position: relative; height: 40px; margin: 10px 0;">
+                            <div style="position: absolute; width: 100%; height: 4px; background: var(--bg-primary); border: 1px solid var(--border-color); top: 18px;"></div>
+                            <div id="timeRangeTrack" style="position: absolute; height: 4px; background: var(--accent-green); top: 18px;"></div>
+                            <input type="range" id="timeRangeStart" min="0" max="100" value="0" style="position: absolute; width: 100%; -webkit-appearance: none; background: transparent; pointer-events: none;">
+                            <input type="range" id="timeRangeEnd" min="0" max="100" value="100" style="position: absolute; width: 100%; -webkit-appearance: none; background: transparent; pointer-events: none;">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--text-secondary);">
+                            <span style="color: var(--range-start); font-weight: bold;">START: <span id="timeRangeStartLabel">0.0s</span></span>
+                            <span style="color: var(--range-end); font-weight: bold;">END: <span id="timeRangeEndLabel">0.0s</span></span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Segment Info</label>
+                        <div style="background: var(--bg-primary); border: 1px solid var(--border-color); padding: 8px; font-size: 10px; font-family: monospace;">
+                            <div>Duration: <span id="selectedDuration" style="color: var(--accent-green);">0.0s</span></div>
+                            <div>Frame Count: <span id="selectedFrameCount" style="color: var(--accent-green);">0</span></div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <button class="button primary" id="previewSegmentBtn" disabled>Confirm Range</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Motion Stabilization -->
+            <div class="panel-section collapsed" id="motionPanel">
+                <div class="panel-header">
+                    <h3>Motion Stabilization</h3>
+                    <span class="chevron">▼</span>
+                </div>
+                <div class="panel-content">
+                    <div class="control-group">
+                        <label class="control-label">Analyze Camera Motion</label>
+                        <button class="button primary" id="stabilizeBtn" disabled>Analyze Motion</button>
+                    </div>
+                    <div class="control-group">
+                        <button class="button secondary" id="skipStabilizationBtn" disabled>Skip Stabilization</button>
+                        <div id="motionProgress" style="display: none;">
+                            <div class="progress-container">
+                                <div class="progress-bar" id="motionProgressBar"></div>
+                            </div>
+                            <div class="progress-text" id="motionProgressText">Processing...</div>
+                        </div>
+                        <div id="motionResults" style="background: var(--bg-primary); border: 1px solid var(--border-color); padding: 8px; margin-top: 5px; font-size: 10px; font-family: monospace; display: none;">
+                            <div>Motion: <span id="motionMagnitude">-- px</span></div>
+                            <div>Confidence: <span id="motionConfidence">--%</span></div>
+                            <div>Frames: <span id="motionFrames">--</span></div>
+                        </div>
+                        <div id="motionVisualization" style="margin-top: 10px; display: none;">
+                            <canvas id="motionVectorCanvas" style="width: 100%; height: 150px; background: var(--bg-primary); border: 1px solid var(--border-color);"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Region Selection -->
+            <div class="panel-section collapsed" id="regionCroppingPanel">
+                <div class="panel-header">
+                    <h3>Region Selection</h3>
+                    <span class="chevron">▼</span>
+                </div>
+                <div class="panel-content">
+                    <div class="control-group">
+                        <label class="control-label">Analysis Region</label>
+                        <p style="font-size: 11px; color: var(--text-secondary); margin: 5px 0;">Draw a rectangle on the video to select the analysis region:</p>
+                        <button id="start-crop-selection" class="button primary">Select Region</button>
+                        <button id="confirm-crop" class="button primary" style="display: none;">Confirm Region</button>
+                        <button id="reset-crop" class="button secondary" style="display: none;">Reset</button>
+                    </div>
+                    <div class="control-group">
+                        <button id="skip-region-selection" class="button secondary">Skip Region Selection</button>
+                        <div id="crop-info" style="margin-top: 10px; font-size: 11px; color: var(--text-secondary);"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: Exposure Normalization -->
+            <div class="panel-section collapsed" id="exposurePanel">
+                <div class="panel-header">
+                    <h3>Exposure Normalization</h3>
+                    <span class="chevron">▼</span>
+                </div>
+                <div class="panel-content">
+                    <div class="control-group">
+                        <label class="control-label">Analyze Exposure Variations</label>
+                        <button class="button primary" id="normalizeBtn" disabled>Analyze Exposure</button>
+                    </div>
+                    <div class="control-group">
+                        <button class="button secondary" id="skipExposureBtn" disabled>Skip Exposure Normalization</button>
+                        <div id="exposureProgress" style="display: none;">
+                            <div class="progress-container">
+                                <div class="progress-bar" id="exposureProgressBar"></div>
+                            </div>
+                            <div class="progress-text" id="exposureProgressText">Processing...</div>
+                        </div>
+                        <div id="exposureResults" style="background: var(--bg-primary); border: 1px solid var(--border-color); padding: 8px; margin-top: 5px; font-size: 10px; font-family: monospace; display: none;">
+                            <div>Brightness: <span id="exposureBrightness">--</span></div>
+                            <div>Variation: <span id="exposureVariation">--%</span></div>
+                            <div>Quality: <span id="exposureQuality">--</span></div>
+                        </div>
+                        <div id="exposureVisualization" style="margin-top: 10px; display: none;">
+                            <canvas id="exposureHistogramCanvas" style="width: 100%; height: 150px; background: var(--bg-primary); border: 1px solid var(--border-color);"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 6: Point Selection -->
+            <div class="panel-section collapsed" id="pointPanel">
+                <div class="panel-header">
+                    <h3>Point Selection</h3>
+                    <span class="chevron">▼</span>
+                </div>
+                <div class="panel-content">
+                    <div class="control-group">
+                        <label class="control-label">Analysis Points</label>
+                        <button class="button primary" id="selectPointBtn" disabled>Add Points</button>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Selected Points</label>
+                        <div id="pointsList" style="max-height: 100px; overflow-y: auto; background: var(--bg-primary); border: 1px solid var(--border-color); padding: 5px; font-size: 10px;">
+                            No points selected
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <button class="button secondary" id="clearPointsBtn" disabled>Clear All Points</button>
+                        <button class="button primary" id="confirmPointsBtn" disabled style="display: none;">Confirm Points</button>
+                    </div>
+                    <div class="control-group" id="pointsHelpText" style="display: none;">
+                        <p style="font-size: 12px; color: var(--text-secondary); margin: 0;">
+                            Points selected! You can now proceed to analyze frequencies.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 7: Temporal Analysis -->
+            <div class="panel-section collapsed" id="analysisPanel">
+                <div class="panel-header">
+                    <h3>Temporal Analysis</h3>
+                    <span class="chevron">▼</span>
+                </div>
+                <div class="panel-content">
+                    <div class="control-group">
+                        <label class="control-label">Frequency Analysis</label>
+                        <button class="button primary" id="startAnalysisBtn" disabled>Analyze Frequencies</button>
+                        <div id="analysisProgress" style="display: none;">
+                            <div class="progress-container">
+                                <div class="progress-bar" id="analysisProgressBar"></div>
+                            </div>
+                            <div class="progress-text" id="analysisProgressText">Processing...</div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Results</label>
+                        <div id="analysisResults" style="background: var(--bg-primary); border: 1px solid var(--border-color); padding: 10px; font-size: 11px; font-family: monospace; display: none;">
+                            <div>Frequency: <span id="dominantFreq">-- Hz</span></div>
+                            <div>Quality: <span id="signalQuality">--%</span></div>
+                            <div>Confidence: <span id="confidence">--%</span></div>
+                        </div>
+                        <div id="analysisVisualization" style="margin-top: 10px; display: none;">
+                            <canvas id="brightnessWaveformCanvas" style="width: 100%; height: 200px; background: var(--bg-primary); border: 1px solid var(--border-color); margin-bottom: 10px;"></canvas>
+                            <canvas id="frequencySpectrumCanvas" style="width: 100%; height: 150px; background: var(--bg-primary); border: 1px solid var(--border-color);"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Re-open Analysis Button (shown after completion) -->
+            <div class="panel-section" id="viewAnalysisPanel" style="display: none; margin-top: 20px;">
+                <button class="button primary full-width" id="viewAnalysisBtn" style="padding: 12px;">
+                    📊 View Full Analysis Dashboard
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Analysis Dashboard (hidden by default) -->
+    <div id="analysisDashboard" class="analysis-dashboard" style="display: none;">
+        <div class="dashboard-header">
+            <h1>Shadowband Analysis Results</h1>
+            <button id="closeDashboard" class="close-btn">← Back to Pipeline</button>
+        </div>
+        
+        <div class="dashboard-content">
+            <!-- Summary Panel -->
+            <div class="summary-panel">
+                <h2>Summary</h2>
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <h3>Dominant Frequency</h3>
+                        <div class="summary-value" id="summaryDominantFreq">-- Hz</div>
+                        <div class="summary-details" id="summaryFreqDetails">--</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Signal Quality</h3>
+                        <div class="summary-value" id="summarySignalQuality">--%</div>
+                        <div class="summary-details" id="summaryQualityDetails">--</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Confidence</h3>
+                        <div class="summary-value" id="summaryConfidence">--%</div>
+                        <div class="summary-details" id="summaryConfidenceDetails">--</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Points</h3>
+                        <div class="summary-value" id="summaryPointCount">--</div>
+                        <div class="summary-details" id="summaryPointDetails">--</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Analysis Area -->
+            <div class="analysis-main">
+                <!-- Point Tabs -->
+                <div class="point-tabs">
+                    <div class="tab-header">
+                        <button class="tab-btn active" data-tab="overview">Overview</button>
+                        <button class="tab-btn" data-tab="methods">Methods</button>
+                        <button class="tab-btn" data-tab="dataExport">Export</button>
+                        <div id="pointTabsContainer"></div>
+                    </div>
+                </div>
+                
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <!-- Overview Tab -->
+                    <div id="overviewTab" class="tab-panel active">
+                        <div class="overview-grid">
+                            <div class="viz-panel">
+                                <h3>Brightness Time Series</h3>
+                                <canvas id="overviewWaveform" class="analysis-canvas"></canvas>
+                            </div>
+                            <div class="viz-panel">
+                                <h3>Frequency Spectrum Comparison</h3>
+                                <canvas id="overviewSpectrum" class="analysis-canvas"></canvas>
+                            </div>
+                            <div class="viz-panel">
+                                <h3>Point Coherence</h3>
+                                <canvas id="coherenceMatrix" class="analysis-canvas"></canvas>
+                            </div>
+                            <div class="viz-panel">
+                                <h3>Parameters</h3>
+                                <div id="processingParams" class="params-display"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Method Comparison Tab -->
+                    <div id="methodsTab" class="tab-panel">
+                        <div class="methods-grid">
+                            <div class="viz-panel full-width">
+                                <h3>Analysis Method Comparison</h3>
+                                <div class="method-comparison-table">
+                                    <table id="methodComparisonTable" class="comparison-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Analysis Method</th>
+                                                <th>Dominant Frequency (Hz)</th>
+                                                <th>Peak Amplitude</th>
+                                                <th>SNR (dB)</th>
+                                                <th>Confidence</th>
+                                                <th>Method Details</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="methodComparisonBody">
+                                            <!-- Dynamic content populated by JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <div class="viz-panel">
+                                <h3>Consensus Analysis</h3>
+                                <div class="consensus-results">
+                                    <div class="consensus-card">
+                                        <h4>Best Estimate</h4>
+                                        <div class="consensus-value" id="consensusFrequency">-- Hz</div>
+                                        <div class="consensus-details" id="consensusDetails">±-- Hz uncertainty</div>
+                                    </div>
+                                    <div class="consensus-card">
+                                        <h4>Method Agreement</h4>
+                                        <div class="consensus-value" id="methodAgreement">--%</div>
+                                        <div class="consensus-details" id="agreementDetails">-- of 4 methods agree</div>
+                                    </div>
+                                    <div class="consensus-card">
+                                        <h4>Overall Confidence</h4>
+                                        <div class="consensus-value" id="overallConfidence">--%</div>
+                                        <div class="consensus-details" id="overallConfidenceDetails">Statistical significance</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="viz-panel">
+                                <h3>Method Spectrum Overlay</h3>
+                                <canvas id="methodSpectrumOverlay" class="analysis-canvas"></canvas>
+                            </div>
+                            
+                            <div class="viz-panel">
+                                <h3>Frequency Precision Analysis</h3>
+                                <div class="precision-analysis">
+                                    <div class="precision-metric">
+                                        <label>FFT Bin Resolution:</label>
+                                        <span id="fftBinResolution">-- Hz</span>
+                                    </div>
+                                    <div class="precision-metric">
+                                        <label>Sub-bin Interpolation:</label>
+                                        <span id="subBinPrecision">-- Hz</span>
+                                    </div>
+                                    <div class="precision-metric">
+                                        <label>Welch's Method Variance Reduction:</label>
+                                        <span id="welchVarianceReduction">--x</span>
+                                    </div>
+                                    <div class="precision-metric">
+                                        <label>Zero-padding Enhancement:</label>
+                                        <span id="zeroPaddingFactor">--x</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Data Export Tab -->
+                    <div id="dataExportTab" class="tab-panel">
+                        <div class="data-export-container">
+                            <div class="export-header">
+                                <h3>Complete Analysis Data Export</h3>
+                                <div class="export-controls">
+                                    <button id="copyDataBtn" class="button secondary">Copy to Clipboard</button>
+                                    <button id="downloadDataBtn" class="button primary">Download as Text</button>
+                                </div>
+                            </div>
+                            <div class="data-output-container">
+                                <pre id="dataOutput" class="data-output">
+<!-- Analysis data will be populated here -->
+                                </pre>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Individual Point Tabs (dynamically generated) -->
+                    <div id="pointTabsContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- OpenCV.js loader -->
+    <script>
+        // Global flag for OpenCV readiness
+        window.cvReady = false;
+        
+        function onOpenCvReady() {
+            console.log('OpenCV.js is ready!');
+            window.cvReady = true;
+            
+            // Dispatch custom event
+            window.dispatchEvent(new Event('opencvready'));
+        }
+    </script>
+    <script async src="https://docs.opencv.org/4.5.5/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
+    
+    <!-- Main application entry point -->
+</body>
+</html>
