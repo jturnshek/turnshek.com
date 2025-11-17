@@ -1,0 +1,1718 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.939413,
+          40.449454
+        ]
+      },
+      "properties": {
+        "lp_value": 28.10633088,
+        "sqm": 19.6,
+        "sqm_readings": [
+          20.2,
+          19.4540905,
+          19.45409047,
+          19.3133333,
+          19.59484765
+        ],
+        "sqm_count": 5,
+        "nelm_equivalent": 5.22,
+        "intensity": 0.407,
+        "census_tract": "42003070300",
+        "neighborhood": "shadyside",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.916081,
+          40.454407
+        ]
+      },
+      "properties": {
+        "lp_value": 30.85963499,
+        "sqm": 19.65,
+        "sqm_readings": [
+          19.98,
+          19.54754467,
+          19.571317,
+          19.5,
+          19.642634
+        ],
+        "sqm_count": 5,
+        "nelm_equivalent": 5.25,
+        "intensity": 0.401,
+        "census_tract": "42003070800",
+        "neighborhood": "shadyside",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.919867,
+          40.452604
+        ]
+      },
+      "properties": {
+        "lp_value": 34.01849506,
+        "sqm": 19.65,
+        "sqm_readings": [
+          19.65,
+          19.645,
+          19.645
+        ],
+        "sqm_count": 3,
+        "nelm_equivalent": 5.25,
+        "intensity": 0.402,
+        "census_tract": "42003140400",
+        "neighborhood": "point breeze",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.92349,
+          40.417508
+        ]
+      },
+      "properties": {
+        "lp_value": 34.01849506,
+        "sqm": 19.57,
+        "sqm_readings": [
+          19.41,
+          19.645,
+          19.645
+        ],
+        "sqm_count": 3,
+        "nelm_equivalent": 5.19,
+        "intensity": 0.411,
+        "census_tract": "42003141400",
+        "neighborhood": "squirrel hill south",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.908022,
+          40.436822
+        ]
+      },
+      "properties": {
+        "lp_value": 42.36884689,
+        "sqm": 19.92,
+        "sqm_readings": [
+          20.19,
+          19.864509,
+          19.8417635,
+          19.91,
+          19.773527
+        ],
+        "sqm_count": 5,
+        "nelm_equivalent": 5.44,
+        "intensity": 0.369,
+        "census_tract": "42003980300",
+        "neighborhood": "squirrel hill south",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.997753,
+          40.426172
+        ]
+      },
+      "properties": {
+        "lp_value": 24.65238373,
+        "sqm": 19.42,
+        "sqm_readings": [
+          19.69,
+          19.32296925,
+          19.36927185,
+          19.2766667,
+          19.461877
+        ],
+        "sqm_count": 5,
+        "nelm_equivalent": 5.09,
+        "intensity": 0.429,
+        "census_tract": "42003180700",
+        "neighborhood": "mt washington",
+        "position": "south",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.997239,
+          40.421182
+        ]
+      },
+      "properties": {
+        "lp_value": 36.85179576,
+        "sqm": 19.73,
+        "sqm_readings": [
+          19.725,
+          19.725
+        ],
+        "sqm_count": 2,
+        "nelm_equivalent": 5.31,
+        "intensity": 0.392,
+        "census_tract": "42003180300",
+        "neighborhood": "allentown",
+        "position": "south",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -80.001715,
+          40.421276
+        ]
+      },
+      "properties": {
+        "lp_value": 37.10945723,
+        "sqm": 19.8,
+        "sqm_readings": [
+          20.09,
+          19.7319675,
+          19.7319675,
+          19.84,
+          19.623935
+        ],
+        "sqm_count": 5,
+        "nelm_equivalent": 5.36,
+        "intensity": 0.382,
+        "census_tract": "42003562400",
+        "neighborhood": "beltzhoover",
+        "position": "south",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.983351,
+          40.414261
+        ]
+      },
+      "properties": {
+        "lp_value": 50.04633864,
+        "sqm": 20.09,
+        "sqm_readings": [
+          20.34,
+          20.031045,
+          20.031045,
+          20.22,
+          19.84209
+        ],
+        "sqm_count": 5,
+        "nelm_equivalent": 5.56,
+        "intensity": 0.347,
+        "census_tract": "42003481000",
+        "neighborhood": "mt oliver (uninc.)",
+        "position": "south",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.97462,
+          40.418391
+        ]
+      },
+      "properties": {
+        "lp_value": 30.5581171,
+        "sqm": 19.55,
+        "sqm_readings": [
+          19.66,
+          19.537726,
+          19.514089,
+          19.585,
+          19.443178
+        ],
+        "sqm_count": 5,
+        "nelm_equivalent": 5.18,
+        "intensity": 0.414,
+        "census_tract": "42003160800",
+        "neighborhood": "south side slopes",
+        "position": "south",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.960414,
+          40.415611
+        ]
+      },
+      "properties": {
+        "lp_value": 33.11667225,
+        "sqm": 19.7,
+        "sqm_readings": [
+          20.05,
+          19.6181325,
+          19.6181325,
+          19.55,
+          19.686265
+        ],
+        "sqm_count": 5,
+        "nelm_equivalent": 5.29,
+        "intensity": 0.395,
+        "census_tract": "42003161000",
+        "neighborhood": "arlington heights",
+        "position": "south",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.964212,
+          40.429368
+        ]
+      },
+      "properties": {
+        "lp_value": 30.36496112,
+        "sqm": 19.55,
+        "sqm_readings": [
+          19.62,
+          19.531385,
+          19.531385,
+          19.47,
+          19.59277
+        ],
+        "sqm_count": 5,
+        "nelm_equivalent": 5.18,
+        "intensity": 0.414,
+        "census_tract": "42003160900",
+        "neighborhood": "south side flats",
+        "position": "south",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.899202,
+          40.454442
+        ]
+      },
+      "properties": {
+        "lp_value": 33.78046507,
+        "sqm": 19.7,
+        "sqm_readings": [
+          19.95,
+          19.63797833,
+          19.6344675,
+          19.645,
+          19.623935
+        ],
+        "sqm_count": 5,
+        "nelm_equivalent": 5.29,
+        "intensity": 0.395,
+        "census_tract": "42003130800",
+        "neighborhood": "homewood south",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.902929,
+          40.452672
+        ]
+      },
+      "properties": {
+        "lp_value": 38.91204524,
+        "sqm": 19.83,
+        "sqm_readings": [
+          20.05,
+          19.7793995,
+          19.7793995,
+          19.885,
+          19.673799
+        ],
+        "sqm_count": 5,
+        "nelm_equivalent": 5.38,
+        "intensity": 0.379,
+        "census_tract": "42003140500",
+        "neighborhood": "point breeze north",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.927555,
+          40.386865
+        ]
+      },
+      "properties": {
+        "lp_value": 68.50483653,
+        "sqm": 20.34,
+        "sqm_readings": [
+          20.345,
+          20.345
+        ],
+        "sqm_count": 2,
+        "nelm_equivalent": 5.72,
+        "intensity": 0.316,
+        "census_tract": "42003565300",
+        "neighborhood": "new homestead",
+        "position": "south",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.908693,
+          40.461593
+        ]
+      },
+      "properties": {
+        "lp_value": 34.90411914,
+        "sqm": 19.72,
+        "sqm_readings": [
+          19.93,
+          19.6707005,
+          19.6707005,
+          19.705,
+          19.636401
+        ],
+        "sqm_count": 5,
+        "nelm_equivalent": 5.3,
+        "intensity": 0.392,
+        "census_tract": "42003120900",
+        "neighborhood": "larimer",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.913512,
+          40.466551
+        ]
+      },
+      "properties": {
+        "lp_value": 37.12350582,
+        "sqm": 19.85,
+        "sqm_readings": [
+          20.31,
+          19.732346,
+          19.732346,
+          19.66,
+          19.804692
+        ],
+        "sqm_count": 5,
+        "nelm_equivalent": 5.39,
+        "intensity": 0.377,
+        "census_tract": "42003120900",
+        "neighborhood": "larimer",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.91507,
+          40.483996
+        ]
+      },
+      "properties": {
+        "lp_value": 50.97957687,
+        "sqm": 20.1,
+        "sqm_readings": [
+          20.29,
+          20.04952075,
+          20.04952075,
+          20.285,
+          19.8140415
+        ],
+        "sqm_count": 5,
+        "nelm_equivalent": 5.56,
+        "intensity": 0.347,
+        "census_tract": "42003980100",
+        "neighborhood": "highland park",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.933767,
+          40.48425
+        ]
+      },
+      "properties": {
+        "lp_value": 41.78720111,
+        "sqm": 19.97,
+        "sqm_readings": [
+          20.45,
+          19.85068575,
+          19.85068575,
+          19.825,
+          19.8763715
+        ],
+        "sqm_count": 5,
+        "nelm_equivalent": 5.47,
+        "intensity": 0.362,
+        "census_tract": "42003101800",
+        "neighborhood": "stanton heights",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.95308,
+          40.47627
+        ]
+      },
+      "properties": {
+        "lp_value": 35.30628873,
+        "sqm": 19.73,
+        "sqm_readings": [
+          19.91,
+          19.68215675,
+          19.68215675,
+          19.65,
+          19.7143135
+        ],
+        "sqm_count": 5,
+        "nelm_equivalent": 5.31,
+        "intensity": 0.392,
+        "census_tract": "42003981000",
+        "neighborhood": "lawrenceville",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.95441667,
+          40.47491667
+        ]
+      },
+      "properties": {
+        "lp_value": 28.37718136,
+        "sqm": 19.67,
+        "sqm_readings": [
+          20.48,
+          19.463681,
+          19.463681,
+          19.185,
+          19.742362
+        ],
+        "sqm_count": 5,
+        "nelm_equivalent": 5.26,
+        "intensity": 0.399,
+        "census_tract": "42003981000",
+        "neighborhood": "lawrenceville",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.96137,
+          40.466332
+        ]
+      },
+      "properties": {
+        "lp_value": 32.06811066,
+        "sqm": 19.68,
+        "sqm_readings": [
+          20.06,
+          19.58595775,
+          19.58595775,
+          19.495,
+          19.6769155
+        ],
+        "sqm_count": 5,
+        "nelm_equivalent": 5.27,
+        "intensity": 0.397,
+        "census_tract": "42003060300",
+        "neighborhood": "lower lawrenceville",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.970407,
+          40.455096
+        ]
+      },
+      "properties": {
+        "lp_value": 30.88723059,
+        "sqm": 19.58,
+        "sqm_readings": [
+          19.73,
+          19.5484385,
+          19.5484385,
+          19.635,
+          19.461877
+        ],
+        "sqm_count": 5,
+        "nelm_equivalent": 5.21,
+        "intensity": 0.409,
+        "census_tract": "42003060500",
+        "neighborhood": "strip district",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -80.02057,
+          40.482658
+        ]
+      },
+      "properties": {
+        "lp_value": 43.32462149,
+        "sqm": 20.0,
+        "sqm_readings": [
+          20.46,
+          19.88681675,
+          19.88681675,
+          19.81,
+          19.9636335
+        ],
+        "sqm_count": 5,
+        "nelm_equivalent": 5.5,
+        "intensity": 0.358,
+        "census_tract": "42003980400",
+        "neighborhood": "perry north",
+        "position": "north",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.99142,
+          40.391457
+        ]
+      },
+      "properties": {
+        "lp_value": 51.12653299,
+        "sqm": 20.15,
+        "sqm_readings": [
+          20.52,
+          20.05239925,
+          20.05239925,
+          20.11,
+          19.9947985
+        ],
+        "sqm_count": 5,
+        "nelm_equivalent": 5.59,
+        "intensity": 0.341,
+        "census_tract": "42003290400",
+        "neighborhood": "carrick",
+        "position": "south",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.989996,
+          40.401661
+        ]
+      },
+      "properties": {
+        "lp_value": 49.21360448,
+        "sqm": 20.1,
+        "sqm_readings": [
+          20.55,
+          20.02,
+          20.01426575,
+          20.01426575,
+          20.0275,
+          20.0010315
+        ],
+        "sqm_count": 6,
+        "nelm_equivalent": 5.56,
+        "intensity": 0.346,
+        "census_tract": "42003290100",
+        "neighborhood": "carrick",
+        "position": "south",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -80.013993,
+          40.404934
+        ]
+      },
+      "properties": {
+        "lp_value": 42.7702428,
+        "sqm": 19.97,
+        "sqm_readings": [
+          20.37,
+          19.87393825,
+          19.87393825,
+          19.965,
+          19.7828765
+        ],
+        "sqm_count": 5,
+        "nelm_equivalent": 5.48,
+        "intensity": 0.362,
+        "census_tract": "42003191700",
+        "neighborhood": "brookline",
+        "position": "south",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -80.06592,
+          40.425329
+        ]
+      },
+      "properties": {
+        "lp_value": 51.89744704,
+        "sqm": 20.18,
+        "sqm_readings": [
+          20.61,
+          20.06736525,
+          20.06736525,
+          20.115,
+          20.0197305
+        ],
+        "sqm_count": 5,
+        "nelm_equivalent": 5.61,
+        "intensity": 0.337,
+        "census_tract": "42003562800",
+        "neighborhood": "oakwood",
+        "position": "south",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -80.067774,
+          40.416555
+        ]
+      },
+      "properties": {
+        "lp_value": 45.24819813,
+        "sqm": 20.04,
+        "sqm_readings": [
+          20.46,
+          19.9302585,
+          19.9302585,
+          19.9,
+          19.960517
+        ],
+        "sqm_count": 5,
+        "nelm_equivalent": 5.52,
+        "intensity": 0.354,
+        "census_tract": "42003562800",
+        "neighborhood": "east carnegie",
+        "position": "south",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -80.050029,
+          40.431157
+        ]
+      },
+      "properties": {
+        "lp_value": 45.02558344,
+        "sqm": 20.03,
+        "sqm_readings": [
+          20.47,
+          19.9253265,
+          19.9253265,
+          19.94,
+          19.910653
+        ],
+        "sqm_count": 5,
+        "nelm_equivalent": 5.52,
+        "intensity": 0.354,
+        "census_tract": "42003563100",
+        "neighborhood": "westwood",
+        "position": "south",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -80.02823981,
+          40.43975548
+        ]
+      },
+      "properties": {
+        "lp_value": 53.2815357,
+        "sqm": 20.35,
+        "sqm_readings": [
+          21.4,
+          20.0936855,
+          20.0936855,
+          19.99,
+          20.197371
+        ],
+        "sqm_count": 5,
+        "nelm_equivalent": 5.73,
+        "intensity": 0.315,
+        "census_tract": "42003191100",
+        "neighborhood": "duquesne heights",
+        "position": "south",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -80.010127,
+          40.441602
+        ]
+      },
+      "properties": {
+        "lp_value": 32.18684565,
+        "sqm": 19.66,
+        "sqm_readings": [
+          19.88,
+          19.5896535,
+          19.5896535,
+          19.5896535
+        ],
+        "sqm_count": 4,
+        "nelm_equivalent": 5.26,
+        "intensity": 0.4,
+        "census_tract": "42003020100",
+        "neighborhood": "central business district",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -80.00367811,
+          40.45514969
+        ]
+      },
+      "properties": {
+        "lp_value": 33.93810244,
+        "sqm": 19.76,
+        "sqm_readings": [
+          20.11,
+          19.642634,
+          19.642634,
+          19.642634
+        ],
+        "sqm_count": 4,
+        "nelm_equivalent": 5.33,
+        "intensity": 0.388,
+        "census_tract": "42003562700",
+        "neighborhood": "allegheny commons",
+        "position": "north",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -80.00995418,
+          40.45684923
+        ]
+      },
+      "properties": {
+        "lp_value": 34.72266706,
+        "sqm": 19.67,
+        "sqm_readings": [
+          19.69,
+          19.66548835,
+          19.66548835,
+          19.66548835
+        ],
+        "sqm_count": 4,
+        "nelm_equivalent": 5.27,
+        "intensity": 0.399,
+        "census_tract": "42003565100",
+        "neighborhood": "central northside",
+        "position": "north",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -80.014482,
+          40.458902
+        ]
+      },
+      "properties": {
+        "lp_value": 46.49314345,
+        "sqm": 20.09,
+        "sqm_readings": [
+          20.48,
+          19.9574005,
+          19.9574005,
+          19.9574005
+        ],
+        "sqm_count": 4,
+        "nelm_equivalent": 5.55,
+        "intensity": 0.348,
+        "census_tract": "42003565100",
+        "neighborhood": "central northside",
+        "position": "north",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -80.003862,
+          40.461502
+        ]
+      },
+      "properties": {
+        "lp_value": 41.68858495,
+        "sqm": 20.01,
+        "sqm_readings": [
+          20.51,
+          19.848323,
+          19.848323,
+          19.848323
+        ],
+        "sqm_count": 4,
+        "nelm_equivalent": 5.5,
+        "intensity": 0.357,
+        "census_tract": "42003250900",
+        "neighborhood": "fineview",
+        "position": "north",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.992471,
+          40.470518
+        ]
+      },
+      "properties": {
+        "lp_value": 39.82594973,
+        "sqm": 19.94,
+        "sqm_readings": [
+          20.37,
+          19.80261435,
+          19.80261435,
+          19.80261435
+        ],
+        "sqm_count": 4,
+        "nelm_equivalent": 5.46,
+        "intensity": 0.365,
+        "census_tract": "42003262000",
+        "neighborhood": "spring hill city view",
+        "position": "north",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -80.011006,
+          40.470354
+        ]
+      },
+      "properties": {
+        "lp_value": 58.49182465,
+        "sqm": 20.16,
+        "sqm_readings": [
+          20.07,
+          20.18698265,
+          20.18698265,
+          20.18698265
+        ],
+        "sqm_count": 4,
+        "nelm_equivalent": 5.6,
+        "intensity": 0.339,
+        "census_tract": "42003261400",
+        "neighborhood": "perry south",
+        "position": "north",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -80.02168747,
+          40.47397823
+        ]
+      },
+      "properties": {
+        "lp_value": 45.30122142,
+        "sqm": 19.99,
+        "sqm_readings": [
+          20.16,
+          19.93142965,
+          19.93142965,
+          19.93142965
+        ],
+        "sqm_count": 4,
+        "nelm_equivalent": 5.49,
+        "intensity": 0.36,
+        "census_tract": "42003271600",
+        "neighborhood": "marshall-shadeland",
+        "position": "north",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -80.03131718,
+          40.48730699
+        ]
+      },
+      "properties": {
+        "lp_value": 60.783833,
+        "sqm": 20.39,
+        "sqm_readings": [
+          20.89,
+          20.2254195,
+          20.2254195,
+          20.2254195
+        ],
+        "sqm_count": 4,
+        "nelm_equivalent": 5.75,
+        "intensity": 0.311,
+        "census_tract": "42003270800",
+        "neighborhood": "brighton heights",
+        "position": "north",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -80.037053,
+          40.476712
+        ]
+      },
+      "properties": {
+        "lp_value": 53.49281517,
+        "sqm": 20.26,
+        "sqm_readings": [
+          20.73,
+          20.097643,
+          20.097643,
+          20.097643
+        ],
+        "sqm_count": 4,
+        "nelm_equivalent": 5.66,
+        "intensity": 0.327,
+        "census_tract": "42003270300",
+        "neighborhood": "brighton heights",
+        "position": "north",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.95482,
+          40.462618
+        ]
+      },
+      "properties": {
+        "lp_value": 35.67329426,
+        "sqm": 19.74,
+        "sqm_readings": [
+          19.9,
+          19.692498,
+          19.692498,
+          19.692498
+        ],
+        "sqm_count": 4,
+        "nelm_equivalent": 5.32,
+        "intensity": 0.39,
+        "census_tract": "42003060300",
+        "neighborhood": "lower lawrenceville",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.964886,
+          40.442874
+        ]
+      },
+      "properties": {
+        "lp_value": 34.63260568,
+        "sqm": 19.78,
+        "sqm_readings": [
+          20.12,
+          19.66289125,
+          19.66289125,
+          19.66289125
+        ],
+        "sqm_count": 4,
+        "nelm_equivalent": 5.34,
+        "intensity": 0.386,
+        "census_tract": "42003040200",
+        "neighborhood": "west oakland",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.956512,
+          40.435665
+        ]
+      },
+      "properties": {
+        "lp_value": 31.23163996,
+        "sqm": 19.69,
+        "sqm_readings": [
+          20.07,
+          19.55952733,
+          19.55952733,
+          19.55952733
+        ],
+        "sqm_count": 4,
+        "nelm_equivalent": 5.28,
+        "intensity": 0.397,
+        "census_tract": "42003040500",
+        "neighborhood": "central oakland",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.93261,
+          40.43448
+        ]
+      },
+      "properties": {
+        "lp_value": 33.62227686,
+        "sqm": 19.73,
+        "sqm_readings": [
+          20.02,
+          19.6332845,
+          19.6332845,
+          19.6332845
+        ],
+        "sqm_count": 4,
+        "nelm_equivalent": 5.31,
+        "intensity": 0.391,
+        "census_tract": "42003141300",
+        "neighborhood": "squirrel hill south",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.926635,
+          40.443211
+        ]
+      },
+      "properties": {
+        "lp_value": 41.5157144,
+        "sqm": 19.94,
+        "sqm_readings": [
+          20.24,
+          19.84416767,
+          19.84416767,
+          19.84416767
+        ],
+        "sqm_count": 4,
+        "nelm_equivalent": 5.46,
+        "intensity": 0.365,
+        "census_tract": "42003140300",
+        "neighborhood": "squirrel hill north",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.9474132,
+          40.43571957
+        ]
+      },
+      "properties": {
+        "lp_value": 38.74453056,
+        "sqm": 19.92,
+        "sqm_readings": [
+          20.37,
+          19.77508525,
+          19.77508525,
+          19.77508525
+        ],
+        "sqm_count": 4,
+        "nelm_equivalent": 5.44,
+        "intensity": 0.368,
+        "census_tract": "42003980500",
+        "neighborhood": "central oakland",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.966273,
+          40.433088
+        ]
+      },
+      "properties": {
+        "lp_value": 40.66205504,
+        "sqm": 19.93,
+        "sqm_readings": [
+          20.26,
+          19.823391,
+          19.823391,
+          19.823391
+        ],
+        "sqm_count": 4,
+        "nelm_equivalent": 5.45,
+        "intensity": 0.367,
+        "census_tract": "42003980800",
+        "neighborhood": "south oakland",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.92342,
+          40.477962
+        ]
+      },
+      "properties": {
+        "lp_value": 45.48985568,
+        "sqm": 20.09,
+        "sqm_readings": [
+          20.54,
+          19.935585,
+          19.935585,
+          19.935585
+        ],
+        "sqm_count": 4,
+        "nelm_equivalent": 5.55,
+        "intensity": 0.348,
+        "census_tract": "42003110200",
+        "neighborhood": "highland park",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.925606,
+          40.484667
+        ]
+      },
+      "properties": {
+        "lp_value": 52.01326848,
+        "sqm": 20.24,
+        "sqm_readings": [
+          20.74,
+          20.0695945,
+          20.0695945,
+          20.0695945
+        ],
+        "sqm_count": 4,
+        "nelm_equivalent": 5.65,
+        "intensity": 0.33,
+        "census_tract": "42003101400",
+        "neighborhood": "morningside",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -80.002829,
+          40.447318
+        ]
+      },
+      "properties": {
+        "lp_value": 30.66899162,
+        "sqm": 19.65,
+        "sqm_readings": [
+          19.98,
+          19.54134775,
+          19.54134775,
+          19.54134775
+        ],
+        "sqm_count": 4,
+        "nelm_equivalent": 5.25,
+        "intensity": 0.401,
+        "census_tract": "42003563201",
+        "neighborhood": "north shore",
+        "position": "north",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.995502,
+          40.45692
+        ]
+      },
+      "properties": {
+        "lp_value": 40.15830824,
+        "sqm": 19.9,
+        "sqm_readings": [
+          20.18,
+          19.810925,
+          19.810925,
+          19.810925
+        ],
+        "sqm_count": 4,
+        "nelm_equivalent": 5.43,
+        "intensity": 0.37,
+        "census_tract": "42003563202",
+        "neighborhood": "east allegheny",
+        "position": "north",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.98604032,
+          40.46171754
+        ]
+      },
+      "properties": {
+        "lp_value": 35.45163414,
+        "sqm": 19.77,
+        "sqm_readings": [
+          20.01,
+          19.686265,
+          19.686265,
+          19.686265
+        ],
+        "sqm_count": 4,
+        "nelm_equivalent": 5.33,
+        "intensity": 0.387,
+        "census_tract": "42003241300",
+        "neighborhood": "troy hill",
+        "position": "north",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.945854,
+          40.442171
+        ]
+      },
+      "properties": {
+        "lp_value": 31.59057602,
+        "sqm": 19.6,
+        "sqm_readings": [
+          19.67,
+          19.5709545,
+          19.5709545
+        ],
+        "sqm_count": 3,
+        "nelm_equivalent": 5.22,
+        "intensity": 0.407,
+        "census_tract": "42003140100",
+        "neighborhood": "squirrel hill north",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.942185,
+          40.456722
+        ]
+      },
+      "properties": {
+        "lp_value": 35.06703793,
+        "sqm": 19.78,
+        "sqm_readings": [
+          19.99,
+          19.67535725,
+          19.67535725
+        ],
+        "sqm_count": 3,
+        "nelm_equivalent": 5.34,
+        "intensity": 0.385,
+        "census_tract": "42003080400",
+        "neighborhood": "bloomfield",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.954729,
+          40.429255
+        ]
+      },
+      "properties": {
+        "lp_value": 39.90877997,
+        "sqm": 19.96,
+        "sqm_readings": [
+          20.27,
+          19.804692,
+          19.804692
+        ],
+        "sqm_count": 3,
+        "nelm_equivalent": 5.47,
+        "intensity": 0.363,
+        "census_tract": "42003040900",
+        "neighborhood": "south oakland",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.93728,
+          40.42522
+        ]
+      },
+      "properties": {
+        "lp_value": 42.34328501,
+        "sqm": 20.05,
+        "sqm_readings": [
+          20.43,
+          19.8639055,
+          19.8639055
+        ],
+        "sqm_count": 3,
+        "nelm_equivalent": 5.53,
+        "intensity": 0.352,
+        "census_tract": "42003151700",
+        "neighborhood": "greenfield",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.901781,
+          40.421289
+        ]
+      },
+      "properties": {
+        "lp_value": 45.98876369,
+        "sqm": 20.12,
+        "sqm_readings": [
+          20.46,
+          19.94649275,
+          19.94649275
+        ],
+        "sqm_count": 3,
+        "nelm_equivalent": 5.57,
+        "intensity": 0.344,
+        "census_tract": "42003141100",
+        "neighborhood": "swisshelm park",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.916816,
+          40.429735
+        ]
+      },
+      "properties": {
+        "lp_value": 43.47995812,
+        "sqm": 20.04,
+        "sqm_readings": [
+          20.35,
+          19.89039575,
+          19.89039575
+        ],
+        "sqm_count": 3,
+        "nelm_equivalent": 5.52,
+        "intensity": 0.353,
+        "census_tract": "42003140800",
+        "neighborhood": "squirrel hill south",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.897524,
+          40.438409
+        ]
+      },
+      "properties": {
+        "lp_value": 48.64232803,
+        "sqm": 20.18,
+        "sqm_readings": [
+          20.53,
+          20.00258975,
+          20.00258975
+        ],
+        "sqm_count": 3,
+        "nelm_equivalent": 5.61,
+        "intensity": 0.337,
+        "census_tract": "42003141200",
+        "neighborhood": "regent square",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.904713,
+          40.446682
+        ]
+      },
+      "properties": {
+        "lp_value": 46.71099608,
+        "sqm": 20.13,
+        "sqm_readings": [
+          20.47,
+          19.96207525,
+          19.96207525
+        ],
+        "sqm_count": 3,
+        "nelm_equivalent": 5.58,
+        "intensity": 0.343,
+        "census_tract": "42003141200",
+        "neighborhood": "point breeze",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.94653243,
+          40.48612746
+        ]
+      },
+      "properties": {
+        "lp_value": 41.17212086,
+        "sqm": 19.99,
+        "sqm_readings": [
+          20.29,
+          19.835857,
+          19.835857
+        ],
+        "sqm_count": 3,
+        "nelm_equivalent": 5.49,
+        "intensity": 0.36,
+        "census_tract": "42003101100",
+        "neighborhood": "upper lawrenceville",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.97954,
+          40.453823
+        ]
+      },
+      "properties": {
+        "lp_value": 25.99950759,
+        "sqm": 19.42,
+        "sqm_readings": [
+          19.52,
+          19.37617325,
+          19.37617325
+        ],
+        "sqm_count": 3,
+        "nelm_equivalent": 5.09,
+        "intensity": 0.429,
+        "census_tract": "42003020300",
+        "neighborhood": "strip district",
+        "position": "east",
+        "data_source": "Kevin Ren Census Tract Measurements (SQM)"
+      }
+    }
+  ]
+}
