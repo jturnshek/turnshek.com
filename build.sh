@@ -43,11 +43,21 @@ build_app() {
     # Install dependencies
     echo "  → Installing dependencies..."
     cd "$source_dir"
-    npm install
+
+    # Use pnpm if pnpm-lock.yaml exists, otherwise use npm
+    if [ -f "pnpm-lock.yaml" ]; then
+        pnpm install
+    else
+        npm install
+    fi
 
     # Build
     echo "  → Building..."
-    npm run build
+    if [ -f "pnpm-lock.yaml" ]; then
+        pnpm run build
+    else
+        npm run build
+    fi
 
     # Copy to deployment directory
     echo "  → Copying to $deploy_dir/..."
