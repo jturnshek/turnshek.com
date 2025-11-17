@@ -20,6 +20,61 @@ NC='\033[0m' # No Color
 ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$ROOT_DIR"
 
+# Function to validate build output
+validate_build() {
+    local app_name=$1
+    local source_dir="source/$app_name"
+    local dist_file="$source_dir/dist/index.html"
+
+    echo "  → Validating build..."
+
+    # Check if dist/index.html exists
+    if [ ! -f "$dist_file" ]; then
+        echo -e "${YELLOW}✗ Validation failed: $dist_file not found${NC}"
+        return 1
+    fi
+
+    # Check file size (should be between 50KB and 500KB for a reasonable build)
+    local file_size=$(stat -f%z "$dist_file" 2>/dev/null || stat -c%s "$dist_file" 2>/dev/null)
+    if [ "$file_size" -lt 51200 ]; then
+        echo -e "${YELLOW}✗ Validation failed: $dist_file too small ($file_size bytes)${NC}"
+        return 1
+    fi
+    if [ "$file_size" -gt 524288 ]; then
+        echo -e "${YELLOW}✗ Validation failed: $dist_file too large ($file_size bytes)${NC}"
+        return 1
+    fi
+
+    # Check for critical content based on app
+    case "$app_name" in
+        "light-pollution")
+            if ! grep -q "Pittsburgh Light Pollution" "$dist_file"; then
+                echo -e "${YELLOW}✗ Validation failed: Missing expected title${NC}"
+                return 1
+            fi
+            if ! grep -q "leaflet" "$dist_file"; then
+                echo -e "${YELLOW}✗ Validation failed: Missing Leaflet library${NC}"
+                return 1
+            fi
+            ;;
+        "shadowbands")
+            if ! grep -q "Shadowband" "$dist_file"; then
+                echo -e "${YELLOW}✗ Validation failed: Missing expected title${NC}"
+                return 1
+            fi
+            ;;
+    esac
+
+    # Check for common build errors
+    if grep -q "vite:error" "$dist_file"; then
+        echo -e "${YELLOW}✗ Validation failed: Build errors found in output${NC}"
+        return 1
+    fi
+
+    echo -e "${GREEN}  ✓ Build validated (${file_size} bytes)${NC}"
+    return 0
+}
+
 # Function to build an app
 build_app() {
     local app_name=$1
@@ -57,6 +112,13 @@ build_app() {
         pnpm run build
     else
         npm run build
+    fi
+
+    # Validate build
+    cd "$ROOT_DIR"
+    if ! validate_build "$app_name"; then
+        echo -e "${YELLOW}Build validation failed for $app_name${NC}"
+        return 1
     fi
 
     # Copy to deployment directory
