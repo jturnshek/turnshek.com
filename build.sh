@@ -34,9 +34,11 @@ build_app() {
         return
     fi
 
-    # Pull latest from submodule
+    # Pull latest from git
     echo "  → Pulling latest from git..."
-    git submodule update --init --remote "$source_dir"
+    cd "$source_dir"
+    git pull
+    cd "$ROOT_DIR"
 
     # Install dependencies
     echo "  → Installing dependencies..."
@@ -73,7 +75,7 @@ build_app() {
 
 # Build all apps
 build_app "light-pollution"
-# build_app "shadowbands"  # Uncomment when shadowbands is set up as submodule
+build_app "shadowbands"
 
 echo -e "${GREEN}================================================${NC}"
 echo -e "${GREEN}All apps built successfully!${NC}"
