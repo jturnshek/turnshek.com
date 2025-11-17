@@ -1,0 +1,20 @@
+# Source directories (git submodules - tracked in .gitmodules)
+source/
+
+# Node modules (should not exist at root, but just in case)
+node_modules/
+
+# OS files
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Editor files
+.vscode/
+.idea/
+*.sublime-*
+
+# Temporary files
+*.log
+npm-debug.log*

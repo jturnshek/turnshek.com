@@ -1,0 +1,3 @@
+[submodule "source/light-pollution"]
+	path = source/light-pollution
+	url = git@github.com:jturnshek/light-pollution.git
